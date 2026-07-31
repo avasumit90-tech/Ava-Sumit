@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom theme colors utility classes if needed */
+.bg-ast-navy { background-color: #1A237E; }
+.text-ast-navy { color: #1A237E; }
+.border-ast-navy { border-color: #1A237E; }
+
+.bg-ast-orange { background-color: #FF6D00; }
+.text-ast-orange { color: #FF6D00; }
+.border-ast-orange { border-color: #FF6D00; }
+
+.bg-ast-green { background-color: #2E7D32; }
+.text-ast-green { color: #2E7D32; }
+.border-ast-green { border-color: #2E7D32; }
+
+.bg-ast-red { background-color: #D32F2F; }
+.text-ast-red { color: #D32F2F; }
+
+/* Custom hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
