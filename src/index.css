@@ -40,3 +40,30 @@
   scrollbar-width: none;
 }
 
+
+/* ── PRINT STYLES (ID card / documents — "Save as PDF" ke liye) ──────────── */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-id-card,
+  #printable-id-card * {
+    visibility: visible !important;
+  }
+  #printable-id-card {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 96mm !important;
+    margin: 0 !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ASSETS } from '../../data';
 import * as api from '../../lib/api';
+import * as dl from '../../lib/download';
 import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt } from 'lucide-react';
 
 export const DonatePage: React.FC = () => {
@@ -310,7 +311,17 @@ export const DonatePage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => {
-                  alert('80G Tax Exemption Certificate PDF downloaded to your device!');
+                  dl.downloadSimplePdf(
+                    '80G Tax Exemption Receipt',
+                    [
+                      { label: 'Donor Name:', value: donorName || 'Valued Donor' },
+                      { label: 'Email:', value: donorEmail || '—' },
+                      { label: 'Amount:', value: `Rs. ${selectedTotal.toLocaleString('en-IN')}` },
+                      { label: 'Date:', value: new Date().toLocaleDateString('en-IN') },
+                      { label: '80G Status:', value: 'Tax Deduction Eligible' },
+                    ],
+                    '80G-Tax-Receipt'
+                  );
                 }}
                 className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >

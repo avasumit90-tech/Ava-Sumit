@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViewMode } from '../../types';
 import { ASSETS } from '../../data';
+import * as dl from '../../lib/download';
 import { Award, Clock, Calendar, Download, Sparkles, CheckCircle2, User, BookOpen, ShieldCheck, ArrowRight } from 'lucide-react';
 import { VolunteerLeaderboard } from '../VolunteerLeaderboard';
 
@@ -166,7 +167,15 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ onNavigate
                 <p className="text-[10px] text-slate-400">Issued Sep 2024</p>
               </div>
               <button
-                onClick={() => alert('Certificate PDF downloaded!')}
+                onClick={() => dl.downloadSimplePdf(
+                  'Certificate of Completion',
+                  [
+                    { label: 'Certificate:', value: 'Astha Foundation Training' },
+                    { label: 'Issued By:', value: 'Astha Foundation' },
+                    { label: 'Date:', value: new Date().toLocaleDateString('en-IN') },
+                  ],
+                  'certificate-download'
+                )}
                 className="p-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl"
                 title="Download Certificate"
               >
@@ -180,7 +189,15 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ onNavigate
                 <p className="text-[10px] text-slate-400">Issued Aug 2024</p>
               </div>
               <button
-                onClick={() => alert('Certificate PDF downloaded!')}
+                onClick={() => dl.downloadSimplePdf(
+                  'Certificate of Completion',
+                  [
+                    { label: 'Certificate:', value: 'Astha Foundation Training' },
+                    { label: 'Issued By:', value: 'Astha Foundation' },
+                    { label: 'Date:', value: new Date().toLocaleDateString('en-IN') },
+                  ],
+                  'certificate-download'
+                )}
                 className="p-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl"
                 title="Download Certificate"
               >
