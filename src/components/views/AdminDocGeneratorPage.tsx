@@ -40,22 +40,36 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
   const [downloading, setDownloading] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
-  const handleDownload = async () => {
+  // ⭐ PDF — naye window me printable card (100% reliable, CORS-free)
+  const handleDownloadPdf = () => {
+    dl.openPrintableCard({
+      name: selectedUser.name || 'Member',
+      id: selectedUser.id || 'AST-XXXX',
+      role: selectedUser.role || 'Member',
+      location: selectedUser.location || '',
+      dob: selectedUser.dob || '—',
+      bloodGroup: selectedUser.bloodGroup || '—',
+      validUntil: validUntilDate,
+      serialNo: serialNo,
+      photoUrl: selectedUser.avatar || ASSETS.rahulIdPhoto,
+      logoUrl: ASSETS.logoCircle,
+      patternUrl: ASSETS.cardPatternBg,
+      qrUrl: ASSETS.qrCode,
+    });
+  };
+
+  // PNG — high-res screenshot capture (agar CORS allow kare)
+  const handleDownloadPng = async () => {
     if (!cardRef.current) return;
     setDownloading(true);
     try {
       const ok = await dl.captureElementAsPng(cardRef.current, `ID-Card-${selectedUser.id || selectedUser.name.replace(/\s+/g, '-')}`);
       if (!ok) {
-        // PNG capture fail (CORS etc.) → print fallback (Save as PDF)
-        dl.triggerPrint();
+        handleDownloadPdf(); // fallback: printable window
       }
     } finally {
       setDownloading(false);
     }
-  };
-
-  const handlePrintPdf = () => {
-    dl.triggerPrint();
   };
 
   const handleGenerate = (e: React.FormEvent) => {
@@ -304,19 +318,19 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
           {/* Card Download Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full max-w-md">
             <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              onClick={handleDownloadPdf}
+              className="flex-[1.2] bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>{downloading ? 'Downloading...' : 'Download PNG (High-Res)'}</span>
+              <span>Download Card (PDF)</span>
             </button>
             <button
-              onClick={handlePrintPdf}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              onClick={handleDownloadPng}
+              disabled={downloading}
+              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
               <Printer className="w-4 h-4 text-amber-400" />
-              <span>Print / Save PDF</span>
+              <span>{downloading ? 'Downloading...' : 'PNG Image'}</span>
             </button>
           </div>
 
