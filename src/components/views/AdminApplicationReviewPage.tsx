@@ -137,8 +137,18 @@ export const AdminApplicationReviewPage: React.FC<AdminApplicationReviewPageProp
     );
   };
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+  };
+
   const handleApprove = () => {
     setStatus('Approved');
+    triggerToast(`🎉 Success! ${applicant.name} has been successfully onboarded as ${applicant.role}!`);
     if (onApprove) onApprove(applicant.id);
   };
 
@@ -522,6 +532,18 @@ export const AdminApplicationReviewPage: React.FC<AdminApplicationReviewPageProp
                 Confirm Rejection
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl border border-amber-500/30 flex items-center gap-3 animate-bounce">
+          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
+            ✓
+          </div>
+          <div>
+            <p className="text-xs font-bold text-amber-400">Onboarding Notification</p>
+            <p className="text-xs text-slate-100 font-medium">{toastMessage}</p>
           </div>
         </div>
       )}

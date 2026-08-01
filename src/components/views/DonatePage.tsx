@@ -4,12 +4,12 @@ import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock,
 
 export const DonatePage: React.FC = () => {
   const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
-  const [amount, setAmount] = useState<number>(50);
+  const [amount, setAmount] = useState<number>(2500);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
   const [donorPan, setDonorPan] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
   const [isSuccess, setIsSuccess] = useState(false);
 
   const selectedTotal = customAmount ? parseFloat(customAmount) || 0 : amount;
@@ -147,9 +147,9 @@ export const DonatePage: React.FC = () => {
 
               {/* Amount Chips */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">Select Amount ($)</label>
+                <label className="block text-xs font-bold text-slate-700">Select Amount (₹)</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {[10, 50, 100].map((amt) => {
+                  {[500, 2500, 10000].map((amt) => {
                     const isSelected = amount === amt && !customAmount;
                     return (
                       <button
@@ -165,8 +165,8 @@ export const DonatePage: React.FC = () => {
                             : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                         }`}
                       >
-                        ${amt}
-                        {amt === 50 && (
+                        ₹{amt.toLocaleString('en-IN')}
+                        {amt === 2500 && (
                           <span className="absolute -top-2.5 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
                             Most Popular
                           </span>
@@ -179,7 +179,7 @@ export const DonatePage: React.FC = () => {
                 <div className="pt-1">
                   <input
                     type="number"
-                    placeholder="Enter Custom Amount ($)"
+                    placeholder="Enter Custom Amount (₹)"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
@@ -255,7 +255,7 @@ export const DonatePage: React.FC = () => {
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold py-4 px-6 rounded-2xl text-sm shadow-lg shadow-orange-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Heart className="w-5 h-5 fill-white/20" />
-                <span>Donate ${selectedTotal || 0} {frequency === 'monthly' ? '/ Month' : 'Now'}</span>
+                <span>Donate ₹{(selectedTotal || 0).toLocaleString('en-IN')} {frequency === 'monthly' ? '/ Month' : 'Now'}</span>
               </button>
 
             </form>
@@ -292,7 +292,7 @@ export const DonatePage: React.FC = () => {
               </div>
               <div className="flex justify-between text-slate-700">
                 <span>Amount Paid:</span>
-                <span className="font-extrabold text-amber-700">${selectedTotal}</span>
+                <span className="font-extrabold text-amber-700">₹{selectedTotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-slate-700">
                 <span>80G Status:</span>

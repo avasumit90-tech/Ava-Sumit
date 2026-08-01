@@ -170,11 +170,24 @@ export const AdminApplicationsListPage: React.FC<AdminApplicationsListPageProps>
     URL.revokeObjectURL(url);
   };
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+  };
+
   const updateStatus = (id: string, newStatus: 'Pending' | 'Verified' | 'Rejected') => {
+    const targetApp = applications.find(a => a.id === id);
     setApplications((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
     );
     setActiveMenuId(null);
+    if (newStatus === 'Verified' && targetApp) {
+      triggerToast(`🎉 Success! ${targetApp.name} has been successfully onboarded as ${targetApp.role}!`);
+    }
   };
 
   const handleReviewClick = (id: string) => {
@@ -560,6 +573,18 @@ export const AdminApplicationsListPage: React.FC<AdminApplicationsListPageProps>
 
         </main>
       </div>
+
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl border border-amber-500/30 flex items-center gap-3 animate-bounce">
+          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
+            ✓
+          </div>
+          <div>
+            <p className="text-xs font-bold text-amber-400">Onboarding Notification</p>
+            <p className="text-xs text-slate-100 font-medium">{toastMessage}</p>
+          </div>
+        </div>
+      )}
 
     </div>
   );

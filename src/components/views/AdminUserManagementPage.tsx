@@ -277,6 +277,96 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
     URL.revokeObjectURL(url);
   };
 
+  // PDF Export / Printable Record View
+  const handleExportPDF = () => {
+    const listToExport = filtered.length > 0 ? filtered : users;
+    if (listToExport.length === 0) {
+      alert('No user records available to export.');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to generate the PDF report.');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Astha Foundation - User Management Report (${new Date().toLocaleDateString()})</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; padding: 30px; margin: 0; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
+            .header h1 { font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 5px 0; }
+            .header p { font-size: 12px; color: #64748b; margin: 0; }
+            .meta { display: flex; justify-content: space-between; font-size: 11px; color: #475569; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+            th { background-color: #f8fafc; color: #334155; font-weight: 800; text-align: left; padding: 10px 12px; border-bottom: 2px solid #cbd5e1; }
+            td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+            tr:nth-child(even) { background-color: #fcfcfc; }
+            .badge { display: inline-block; padding: 3px 8px; border-radius: 9999px; font-size: 9px; font-weight: 700; background: #e0f2fe; color: #0369a1; }
+            .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+            @media print {
+              button { display: none !important; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ASTHA FOUNDATION TRUST</h1>
+            <p>Official User Management & Offline Records Report</p>
+          </div>
+          <div class="meta">
+            <div><strong>Generated Date:</strong> ${new Date().toLocaleString()}</div>
+            <div><strong>Total Records:</strong> ${listToExport.length}</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Location</th>
+                <th>Phone</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${listToExport.map(u => `
+                <tr>
+                  <td><strong>${u.id}</strong></td>
+                  <td>${u.name}<br/><span style="color:#64748b; font-size:10px;">${u.email}</span></td>
+                  <td><span class="badge">${u.role}</span></td>
+                  <td>${u.department || 'Education'}</td>
+                  <td>${u.location}</td>
+                  <td>${u.phone || 'N/A'}</td>
+                  <td><strong>${u.status}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            <p>© Astha Foundation Management System • Confidential Offline Record</p>
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6 pb-16 font-sans">
       
@@ -308,6 +398,15 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
           >
             <Download className="w-4 h-4 text-slate-700" />
             <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={handleExportPDF}
+            className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            title="Export PDF document for offline records"
+          >
+            <Download className="w-4 h-4 text-rose-600" />
+            <span>Export PDF</span>
           </button>
 
           <button
