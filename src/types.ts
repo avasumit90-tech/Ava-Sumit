@@ -20,7 +20,9 @@ export type ViewMode =
   | 'admin-help'
   | 'admin-cms'
   | 'user-dashboard'
-  | 'user-certificates';
+  | 'user-certificates'
+  | 'login'
+  | 'signup';
 
 export type RoleType = 'didi' | 'maa' | 'teacher' | 'student' | 'coordinator';
 

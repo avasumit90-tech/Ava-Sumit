@@ -1,28 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ViewMode } from '../types';
 import { ASSETS } from '../data';
-import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award, LogIn, LogOut } from 'lucide-react';
+import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
-import { AdminLoginModal } from './AdminLoginModal';
-import * as api from '../lib/api';
 
 interface NavbarProps {
   currentView: ViewMode;
   onNavigate: (view: ViewMode) => void;
   onOpenCheckStatus: () => void;
+  currentUser: { email?: string } | null;
+  onLogout: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenCheckStatus }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenCheckStatus, currentUser, onLogout }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
-
-  // Restore session on mount + react to auth changes
-  useEffect(() => {
-    api.getSessionUser().then(setCurrentUser);
-    const unsub = api.onAuthStateChange((u) => setCurrentUser(u));
-    return unsub;
-  }, []);
 
   const navItems: { label: string; view: ViewMode; icon: React.ReactNode; badge?: string }[] = [
     { label: 'Home', view: 'home', icon: <Home className="w-4 h-4" /> },
@@ -116,13 +107,42 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
               <span>Donate Now</span>
             </button>
 
-            <button
-              onClick={() => setLoginOpen(true)}
-              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
-            >
-              {currentUser ? <LogOut className="w-3.5 h-3.5 text-amber-400" /> : <Shield className="w-3.5 h-3.5 text-amber-400" />}
-              <span>{currentUser ? 'Sign Out' : 'Admin Login'}</span>
-            </button>
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate('user-dashboard')}
+                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
+                  title={currentUser.email}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="max-w-[120px] truncate">{currentUser.email}</span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="flex items-center gap-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer border border-slate-200"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate('signup')}
+                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-colors cursor-pointer shadow-md shadow-amber-500/20"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Sign Up</span>
+                </button>
+                <button
+                  onClick={() => onNavigate('login')}
+                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Login</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Hamburger Menu Icon Button */}
@@ -155,15 +175,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
         currentView={currentView}
         onNavigate={onNavigate}
         onOpenCheckStatus={onOpenCheckStatus}
-      />
-
-      {/* Admin Login / Sign Out Modal */}
-      <AdminLoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onLogin={(email) => setCurrentUser({ email })}
-        onLogout={() => setCurrentUser(null)}
-        currentUser={currentUser}
       />
     </header>
   );

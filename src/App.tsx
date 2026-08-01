@@ -29,12 +29,23 @@ import { AdminHelpPage } from './components/views/AdminHelpPage';
 import { AdminCMSPage } from './components/views/AdminCMSPage';
 import { UserDashboardPage } from './components/views/UserDashboardPage';
 import { UserCertificatesPage } from './components/views/UserCertificatesPage';
+import { LoginPage } from './components/views/LoginPage';
+import { SignUpPage } from './components/views/SignUpPage';
 
 export function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('home');
   const [selectedRole, setSelectedRole] = useState<RoleType>('didi');
   const [isCheckStatusOpen, setIsCheckStatusOpen] = useState(false);
-  
+
+  // ── AUTH STATE (session) ──────────────────────────────────────────────────
+  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+
+  useEffect(() => {
+    api.getSessionUser().then(setCurrentUser);
+    const unsub = api.onAuthStateChange((u) => setCurrentUser(u));
+    return unsub;
+  }, []);
+
   // Application Data State
   const [users, setUsers] = useState<UserRecord[]>(INITIAL_USERS);
   const [projects, setProjects] = useState<ProjectItem[]>(INITIAL_PROJECTS);
@@ -166,6 +177,8 @@ export function App() {
         currentView={currentView}
         onNavigate={handleNavigate}
         onOpenCheckStatus={() => setIsCheckStatusOpen(true)}
+        currentUser={currentUser}
+        onLogout={async () => { await api.signOut(); setCurrentUser(null); }}
       />
 
       {/* Admin Submenu Navigation */}
@@ -335,6 +348,22 @@ export function App() {
               onNavigate={handleNavigate}
             />
           </div>
+        )}
+
+        {currentView === 'login' && (
+          <LoginPage
+            onNavigate={handleNavigate}
+            onLogin={(email) => setCurrentUser({ email })}
+            onSignUpClick={() => handleNavigate('signup')}
+          />
+        )}
+
+        {currentView === 'signup' && (
+          <SignUpPage
+            onNavigate={handleNavigate}
+            onSignUpDone={() => setCurrentUser(null)}
+            onLoginClick={() => handleNavigate('login')}
+          />
         )}
       </main>
 

@@ -283,6 +283,24 @@ export async function signIn(email: string, password: string) {
   }
 }
 
+export async function signUp(email: string, password: string, fullName: string) {
+  if (!isSupabaseConfigured || !supabase) {
+    return { error: new Error('Supabase configured nahi hai — VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY set karo.') };
+  }
+  try {
+    // Trigger (handle_new_user) profile auto-create kar deta hai
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
+    if (error) return { error };
+    return { data };
+  } catch (e) {
+    return { error: e as Error };
+  }
+}
+
 export async function signOut() {
   if (!isSupabaseConfigured || !supabase) return;
   try { await supabase.auth.signOut(); } catch (e) { console.error('[api] signOut:', e); }
