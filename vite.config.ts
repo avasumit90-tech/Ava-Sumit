@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages subpath (https://USER.github.io/REPO/) par assets sahi
+    // chalne ke liye relative base. Vercel/Netlify par bhi kaam karta hai.
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
