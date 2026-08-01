@@ -5,8 +5,10 @@
 --    Supabase Dashboard → SQL Editor → New query → Run
 --    (idempotent — safe to re-run)
 --
--- Creates: 15 tables, 10 enum types, 24 indexes, 6 triggers, 40+ RLS
--- policies, 6 storage buckets, 1 public status view, and demo seed data.
+-- Creates: 16 tables, 10 enum types, 24 indexes, 6 triggers, 44+ RLS
+-- policies, 6 storage buckets, 2 public safe views, and demo seed data.
+-- Includes fixes verified by live testing (profiles privacy, own-view
+-- policy, registration_status security_invoker, public_members view).
 -- ============================================================================
 
 -- ============================================================================
@@ -484,10 +486,17 @@ $$;
 -- ---------------------------------------------------------------------------
 alter table public.profiles enable row level security;
 
+-- NOTE: profiles table is NOT public-readable (privacy: emails/phones/addresses).
+-- Public visitors see only safe fields via the public_members view below.
+-- ⚠️ Members MUST be able to SELECT their own row, otherwise PostgreSQL also
+--    blocks their own UPDATE (verified in live tests) — so the own-view policy
+--    is REQUIRED alongside the own-update policy.
+
 drop policy if exists "Public profiles are viewable by everyone"   on public.profiles;
-create policy "Public profiles are viewable by everyone"
+drop policy if exists "Users can view own profile"                 on public.profiles;
+create policy "Users can view own profile"
   on public.profiles for select
-  using (true);
+  using (auth.uid() = auth_user_id);
 
 drop policy if exists "Users can insert their own profile"          on public.profiles;
 create policy "Users can insert their own profile"
@@ -503,6 +512,14 @@ drop policy if exists "Admins can manage all profiles"              on public.pr
 create policy "Admins can manage all profiles"
   on public.profiles for all
   using (public.is_admin());
+
+-- Safe public members directory view (no email/phone/dob/address!)
+create or replace view public.public_members as
+  select member_id, full_name, role, status, location, avatar_url, registration_date
+  from public.profiles
+  where status <> 'Inactive';
+
+grant select on public.public_members to anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 6.2 REGISTRATIONS
@@ -741,12 +758,20 @@ create policy "Admins can manage settings"
 -- 6.11 PUBLIC STATUS VIEW  (safe "Check Application Status" lookup)
 --     Exposes ONLY status fields by reference number — no emails/phones/
 --     addresses. Works with the app's CheckStatusModal.
+--
+--     ⚠️ IMPORTANT: Supabase's SQL Editor creates views with
+--     security_invoker=on by default, which makes the view obey the caller's
+--     RLS (so anon would see 0 rows). We reset it to owner privileges so the
+--     view itself is queryable by anyone, while still exposing only safe
+--     columns (defense-in-depth: view exposes no PII).
 -- ---------------------------------------------------------------------------
 create or replace view public.registration_status as
   select member_id, applicant_name, role, status, step_completed, total_steps,
          remarks, submitted_at
   from public.registrations
   where member_id is not null;
+
+alter view public.registration_status reset (security_invoker);
 
 grant select on public.registration_status to anon, authenticated;
 

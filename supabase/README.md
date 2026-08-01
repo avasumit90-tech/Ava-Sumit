@@ -156,16 +156,47 @@ await supabase.storage
 
 ---
 
-## 🧪 Ye sab kaise verify kiya?
+## 🔑 Test IDs (aapke Supabase project me create kiye gaye)
 
-Har query ko real **PostgreSQL 17** par run karke test kiya:
-- ✅ Schema + seed bina error ke chalta hai (43 policies, 6 triggers, 6 buckets)
-- ✅ Naya signup → profile auto-create hoti hai
-- ✅ Existing demo member signup → profile link hoti hai (Rahul Sharma test)
-- ✅ Anon: public tables read, audit/donations blocked, form submit kar sakta hai
-- ✅ Logged-in: apna profile/application/donation hi dekh sakta hai
-- ✅ Admin: sab kuch (audit logs, saare profiles, saare registrations)
-- ✅ Public status view (`registration_status`) PII ke bina kaam karta hai
+| Role | Email | Password | Kya hai |
+|---|---|---|---|
+| 👑 **Super Admin** | `test@asthafoundation.org` | `Astha@Test#2026` | Admin panel ke liye (audit logs, saare users, sab kuch) |
+| 👤 **Member** | `member.test@asthafoundation.org` | `Member@Test#2026` | Normal member (sirf apna profile/application) |
+
+> ⚠️ Inhe production me use karna ho toh password change kar dena (Auth → Users → edit).
+> Agar nahi chahiye toh Auth → Users → delete kar sakte ho.
+
+---
+
+## 🧪 Complete Live Test Report (2026-08-01)
+
+**15 tables + 1 safe view + 1 members view** — sab populated ✅
+**43 RLS policies, 6 triggers, 10 enums, 24 indexes, 6 storage buckets** ✅
+
+| # | Test | Result |
+|---|---|---|
+| A1 | Public: projects/gallery/partners readable (anon) | ✅ |
+| A2 | Security: audit_logs/profiles/certificates anon ko BLOCKED | ✅ |
+| A3 | Public: `public_members` safe view (email/phone ke bina) | ✅ |
+| A4 | Public: `registration_status` check-status feature | ✅ |
+| A5 | Public: registration form submit (plain insert) | ✅ 201 |
+| A6 | Public: donation record | ✅ 201 |
+| A7 | Security: anon projects edit nahi kar sakta | ✅ blocked |
+| B1 | Member: apna profile dekh sakta hai | ✅ |
+| B2 | Member: apna profile update kar sakta hai | ✅ |
+| B3 | Security: member doosron ka profile edit/delete nahi kar sakta | ✅ blocked |
+| B4 | Security: member audit_logs/donations nahi dekh sakta | ✅ blocked |
+| C1 | Admin: audit_logs dekh sakta hai | ✅ |
+| C2 | Admin: saare profiles/donations/registrations | ✅ |
+| C3 | Admin: kisi bhi profile ko update kar sakta hai | ✅ |
+| D1 | Trigger: naya signup → profile auto-create | ✅ |
+| D2 | Trigger: existing member signup → profile link | ✅ |
+| D3 | Sign-in: password login dono test users ke liye | ✅ |
+
+**Testing ke dauraan mili 3 real bugs jo fix kiye:**
+1. **Profiles public-readable the** (sab members ke email/phone public dikhte) → ab `profiles` anon ko hidden, safe `public_members` view bana diya.
+2. **Members apna profile update nahi kar paate the** — SELECT policy missing thi (bina uske PostgreSQL own-UPDATE bhi block karta hai) → `Users can view own profile` policy add ki.
+3. **`registration_status` view Supabase me `security_invoker=on` ban rahi thi** → public ko 0 rows dikhti thi → ab `security_invoker` reset kiya.
 
 ---
 
