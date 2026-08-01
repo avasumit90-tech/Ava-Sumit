@@ -501,10 +501,17 @@ create policy "Admins can manage all profiles"
   using (public.is_admin());
 
 -- Safe public members directory view (no email/phone/dob/address!)
-create or replace view public.public_members as
+-- ⚠️ Supabase views par security_invoker=on auto lag sakta hai (SQL editor /
+--    Management API) — isse view caller ki RLS ke saath chalta hai aur anon ko
+--    0 rows milti hain. Isliye explicitly OFF karte hain (owner=postgres
+--    bypasses RLS, aur view sirf safe columns expose karta hai).
+create or replace view public.public_members
+with (security_invoker = false) as
   select member_id, full_name, role, status, location, avatar_url, registration_date
   from public.profiles
   where status <> 'Inactive';
+
+alter view public.public_members reset (security_invoker);
 
 grant select on public.public_members to anon, authenticated;
 
@@ -752,7 +759,8 @@ create policy "Admins can manage settings"
 --     view itself is queryable by anyone, while still exposing only safe
 --     columns (defense-in-depth: view exposes no PII).
 -- ---------------------------------------------------------------------------
-create or replace view public.registration_status as
+create or replace view public.registration_status
+with (security_invoker = false) as
   select member_id, applicant_name, role, status, step_completed, total_steps,
          remarks, submitted_at
   from public.registrations

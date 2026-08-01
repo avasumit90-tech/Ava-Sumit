@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as api from '../../lib/api';
 import { ViewMode } from '../../types';
 import { Briefcase, Plus, Trash2, CheckCircle } from 'lucide-react';
 
@@ -22,6 +23,13 @@ export const AdminPartnersPage: React.FC<AdminPartnersPageProps> = ({ onNavigate
     { id: 'PAR-3', name: 'Ministry of Women & Child', logoUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=200', website: 'https://wcd.nic.in', displayOrder: 3, status: 'Active' },
   ]);
 
+  // Live partners from Supabase — fallback to demo list
+  useEffect(() => {
+    api.fetchPartners().then((live) => {
+      if (live && live.length > 0) setPartners(live as PartnerItem[]);
+    });
+  }, []);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [name, setName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
@@ -38,6 +46,7 @@ export const AdminPartnersPage: React.FC<AdminPartnersPageProps> = ({ onNavigate
       displayOrder: partners.length + 1,
       status: 'Active'
     };
+    api.addPartner({ name: newPartner.name, logoUrl: newPartner.logoUrl, website: newPartner.website, displayOrder: newPartner.displayOrder });
     setPartners([...partners, newPartner]);
     setShowAddModal(false);
     setName('');

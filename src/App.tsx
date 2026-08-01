@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ViewMode, RoleType, UserRecord, ProjectItem, ApplicationStatus, ActivityItem } from './types';
 import { INITIAL_USERS, INITIAL_PROJECTS, INITIAL_APPLICATIONS, INITIAL_ACTIVITIES, ASSETS } from './data';
+import * as api from './lib/api';
+import { isSupabaseConfigured } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { AdminSubMenu } from './components/AdminSubMenu';
 import { Footer } from './components/Footer';
@@ -41,6 +43,30 @@ export function App() {
   const [selectedUserForCardGen, setSelectedUserForCardGen] = useState<UserRecord | null>(null);
   const [selectedUserProfile, setSelectedUserProfile] = useState<UserRecord | null>(null);
 
+  // ── LIVE DATA LOAD (Supabase se, agar configured hai) ─────────────────────
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const loadLiveData = useCallback(async () => {
+    if (!isSupabaseConfigured) return;
+    try {
+      const [u, p, a, act] = await Promise.all([
+        api.fetchUsers(),
+        api.fetchProjects(),
+        api.fetchApplications(),
+        api.fetchActivities(),
+      ]);
+      setUsers(u.length ? u : INITIAL_USERS);
+      setProjects(p.length ? p : INITIAL_PROJECTS);
+      setApplications(a.length ? a : INITIAL_APPLICATIONS);
+      setActivities(act.length ? act : INITIAL_ACTIVITIES);
+    } catch (e) {
+      console.error('[App] live data load failed:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLiveData().finally(() => setDataLoaded(true));
+  }, [loadLiveData]);
+
   // Navigation Handler
   const handleNavigate = (view: ViewMode) => {
     setCurrentView(view);
@@ -56,6 +82,17 @@ export function App() {
 
   // New Application Submission Handler
   const handleAddApplication = (newApp: ApplicationStatus) => {
+    // Live DB me save (agar configured hai)
+    api.submitRegistration({
+      role: (newApp.role.toLowerCase().includes('didi') ? 'didi'
+        : newApp.role.toLowerCase().includes('maa') ? 'maa'
+        : newApp.role.toLowerCase().includes('teacher') ? 'teacher'
+        : newApp.role.toLowerCase().includes('coordinator') ? 'coordinator'
+        : 'student'),
+      fullName: newApp.applicantName,
+      email: `${newApp.applicantName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+    }).catch(err => console.error('[App] submitRegistration failed:', err));
+
     setApplications(prev => [newApp, ...prev]);
 
     // Also register in users list
@@ -80,20 +117,24 @@ export function App() {
       icon: 'person_add'
     };
     setActivities(prev => [newAct, ...prev]);
+    api.logActivity(newAct.title, 'volunteer', 'person_add');
   };
 
   // User Management Actions
   const handleUpdateUserStatus = (id: string, status: 'Active' | 'Pending' | 'Inactive') => {
+    api.updateUserStatus(id, status);
     setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u));
     setApplications(prev => prev.map(a => a.id === id ? { ...a, status: status === 'Active' ? 'Approved' : 'Under Review' } : a));
   };
 
   const handleDeleteUser = (id: string) => {
+    api.deleteUser(id);
     setUsers(prev => prev.filter(u => u.id !== id));
     setApplications(prev => prev.filter(a => a.id !== id));
   };
 
   const handleAddProject = (newProj: ProjectItem) => {
+    api.addProject(newProj);
     setProjects(prev => [newProj, ...prev]);
     const newAct: ActivityItem = {
       id: `ACT-${Date.now()}`,

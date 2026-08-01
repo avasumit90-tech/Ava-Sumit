@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import * as api from '../../lib/api';
 import { 
   Search, Download, ChevronLeft, ChevronRight, MoreVertical, 
   CheckCircle, XCircle, Clock, Eye, Filter, Plus, ArrowLeft,
@@ -28,8 +29,10 @@ export const AdminApplicationsListPage: React.FC<AdminApplicationsListPageProps>
   onNavigate,
   onSelectApplication,
 }) => {
-  // Sample applications dataset
-  const [applications, setApplications] = useState<ApplicationRecord[]>([
+  const [applications, setApplications] = useState<ApplicationRecord[]>([]);
+
+  // Live applications from Supabase registrations — fallback to sample list
+  const SAMPLE: ApplicationRecord[] = [
     {
       id: 'APP-101',
       name: 'Priya Sharma',
@@ -103,7 +106,26 @@ export const AdminApplicationsListPage: React.FC<AdminApplicationsListPageProps>
       status: 'Verified',
       location: 'Udaipur, Rajasthan',
     },
-  ]);
+  ];
+
+  useEffect(() => {
+    api.fetchApplications().then((live) => {
+      if (live && live.length > 0) {
+        setApplications(live.map((a) => ({
+          id: a.id,
+          name: a.applicantName,
+          email: '',
+          phone: '',
+          role: a.role,
+          appliedDate: a.submittedDate,
+          status: (a.status === 'Approved' ? 'Verified' : a.status === 'Rejected' ? 'Rejected' : 'Pending') as ApplicationRecord['status'],
+          location: '',
+        })));
+      } else {
+        setApplications(SAMPLE);
+      }
+    }).catch(() => setApplications(SAMPLE));
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

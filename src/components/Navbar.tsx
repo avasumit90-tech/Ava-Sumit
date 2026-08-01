@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode } from '../types';
 import { ASSETS } from '../data';
-import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award } from 'lucide-react';
+import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award, LogIn, LogOut } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
+import { AdminLoginModal } from './AdminLoginModal';
+import * as api from '../lib/api';
 
 interface NavbarProps {
   currentView: ViewMode;
@@ -12,6 +14,15 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenCheckStatus }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+
+  // Restore session on mount + react to auth changes
+  useEffect(() => {
+    api.getSessionUser().then(setCurrentUser);
+    const unsub = api.onAuthStateChange((u) => setCurrentUser(u));
+    return unsub;
+  }, []);
 
   const navItems: { label: string; view: ViewMode; icon: React.ReactNode; badge?: string }[] = [
     { label: 'Home', view: 'home', icon: <Home className="w-4 h-4" /> },
@@ -106,11 +117,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
             </button>
 
             <button
-              onClick={() => onNavigate('admin-dashboard')}
+              onClick={() => setLoginOpen(true)}
               className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Admin Login</span>
+              {currentUser ? <LogOut className="w-3.5 h-3.5 text-amber-400" /> : <Shield className="w-3.5 h-3.5 text-amber-400" />}
+              <span>{currentUser ? 'Sign Out' : 'Admin Login'}</span>
             </button>
           </div>
 
@@ -144,6 +155,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
         currentView={currentView}
         onNavigate={onNavigate}
         onOpenCheckStatus={onOpenCheckStatus}
+      />
+
+      {/* Admin Login / Sign Out Modal */}
+      <AdminLoginModal
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onLogin={(email) => setCurrentUser({ email })}
+        onLogout={() => setCurrentUser(null)}
+        currentUser={currentUser}
       />
     </header>
   );

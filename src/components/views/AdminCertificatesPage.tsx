@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode, UserRecord } from '../../types';
+import * as api from '../../lib/api';
 import { Award, Search, Download, Shield, Plus, CheckCircle, QrCode, FileText } from 'lucide-react';
 
 interface AdminCertificatesPageProps {
@@ -23,6 +24,13 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
     { id: 'CERT-502', recipientName: 'Pooja Verma', type: 'Internship Certificate', certificateNumber: 'ASTHA/INT/2026/402', issueDate: '2026-07-20', qrCode: 'VERIFIED-QR-402' },
   ]);
 
+  // Live certificates from Supabase — fallback to demo list
+  useEffect(() => {
+    api.fetchCertificates().then((live) => {
+      if (live && live.length > 0) setCertificates(live as CertificateRecord[]);
+    });
+  }, []);
+
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(users[0]?.name || 'Rahul Kumar');
   const [certType, setCertType] = useState<'Training Certificate' | 'Internship Certificate'>('Training Certificate');
@@ -39,6 +47,14 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
       qrCode: `VERIFIED-QR-${Math.floor(1000 + Math.random() * 9000)}`
     };
 
+    // Live DB me certificate save (agar configured hai)
+    api.addCertificate({
+      recipientName: newCert.recipientName,
+      type: newCert.type,
+      certificateNumber: newCert.certificateNumber,
+      issueDate: newCert.issueDate,
+      qrCode: newCert.qrCode,
+    });
     setCertificates([newCert, ...certificates]);
     setShowGenerateModal(false);
     setActivePreviewCert(newCert);

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as api from '../../lib/api';
 import { ViewMode } from '../../types';
 import { FileText, Download, Plus, Shield, Trash2 } from 'lucide-react';
 
@@ -22,6 +23,13 @@ export const AdminLegalPage: React.FC<AdminLegalPageProps> = ({ onNavigate }) =>
     { id: 'LEG-4', title: 'PAN Card of Astha Foundation', category: 'Tax & Financial', fileSize: '450 KB', uploadDate: '2025-01-12' },
   ]);
 
+  // Live legal docs from Supabase — fallback to demo list
+  useEffect(() => {
+    api.fetchLegalDocuments().then((live) => {
+      if (live && live.length > 0) setDocs(live as LegalDoc[]);
+    });
+  }, []);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Registration');
@@ -36,6 +44,7 @@ export const AdminLegalPage: React.FC<AdminLegalPageProps> = ({ onNavigate }) =>
       fileSize: '1.5 MB',
       uploadDate: new Date().toISOString().split('T')[0]
     };
+    api.addLegalDocument({ title: newDoc.title, category: newDoc.category });
     setDocs([...docs, newDoc]);
     setShowAddModal(false);
     setTitle('');

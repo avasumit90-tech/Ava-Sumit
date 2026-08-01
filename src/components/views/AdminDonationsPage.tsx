@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode } from '../../types';
+import * as api from '../../lib/api';
 import { Heart, Search, Download, CheckCircle, Shield, Plus, DollarSign, FileText, QrCode } from 'lucide-react';
 
 interface AdminDonationsPageProps {
@@ -26,6 +27,13 @@ export const AdminDonationsPage: React.FC<AdminDonationsPageProps> = ({ onNaviga
     { id: 'DON-1003', donorName: 'Amit Patel', email: 'amit.patel@example.com', amount: 2500, transactionId: 'TXN983427184', status: 'Success', date: '2026-07-30 09:45', reg80gNumber: 'AAATA1234F/80G/2025', receiptNumber: 'ASTHA/REC/2026/091' },
     { id: 'DON-1004', donorName: 'Sunita Gupta', email: 'sunita.g@example.com', amount: 10000, transactionId: 'TXN983427185', status: 'Pending', date: '2026-07-31 08:30', reg80gNumber: 'AAATA1234F/80G/2025', receiptNumber: 'ASTHA/REC/2026/092' },
   ]);
+
+  // Live donations from Supabase (admin-only read) — fallback to demo list
+  useEffect(() => {
+    api.fetchDonations().then((live) => {
+      if (live && live.length > 0) setDonations(live as DonationRecord[]);
+    });
+  }, []);
 
   const [selectedReceipt, setSelectedReceipt] = useState<DonationRecord | null>(null);
 

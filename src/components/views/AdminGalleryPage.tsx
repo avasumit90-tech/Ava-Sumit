@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as api from '../../lib/api';
 import { ViewMode } from '../../types';
 import { Image as ImageIcon, Plus, Trash2, Search, Video, Eye } from 'lucide-react';
 
@@ -21,6 +22,13 @@ export const AdminGalleryPage: React.FC<AdminGalleryPageProps> = ({ onNavigate }
     { id: 'GAL-3', title: 'Rural Student Digital Literacy Camp', category: 'Education', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800', date: '2026-07-20' },
   ]);
 
+  // Live gallery from Supabase — fallback to demo list
+  useEffect(() => {
+    api.fetchGalleryItems().then((live) => {
+      if (live && live.length > 0) setItems(live as GalleryItem[]);
+    });
+  }, []);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Training');
@@ -36,6 +44,7 @@ export const AdminGalleryPage: React.FC<AdminGalleryPageProps> = ({ onNavigate }
       image: imageUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
       date: new Date().toISOString().split('T')[0]
     };
+    api.addGalleryItem({ title: newItem.title, category: newItem.category, imageUrl: newItem.image });
     setItems([newItem, ...items]);
     setShowAddModal(false);
     setTitle('');

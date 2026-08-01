@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ASSETS } from '../../data';
+import * as api from '../../lib/api';
 import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt } from 'lucide-react';
 
 export const DonatePage: React.FC = () => {
@@ -17,6 +18,12 @@ export const DonatePage: React.FC = () => {
   const handleDonate = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedTotal <= 0) return;
+    // Live DB me donation record (agar Supabase configured hai)
+    api.submitDonation({
+      donorName: donorName || 'Anonymous Donor',
+      email: donorEmail || 'anon@donor.in',
+      amount: selectedTotal,
+    });
     setIsSuccess(true);
   };
 

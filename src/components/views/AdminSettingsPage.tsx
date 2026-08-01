@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode } from '../../types';
+import * as api from '../../lib/api';
 import { Settings, Shield, Save, CheckCircle } from 'lucide-react';
 
 interface AdminSettingsPageProps {
@@ -15,8 +16,30 @@ export const AdminSettingsPage: React.FC<AdminSettingsPageProps> = ({ onNavigate
   const [teacherFee, setTeacherFee] = useState('1000');
   const [saved, setSaved] = useState(false);
 
+  // Live settings from Supabase — fallback to defaults
+  useEffect(() => {
+    api.fetchSettings().then((s) => {
+      if (s) {
+        if (s.org) {
+          if (s.org.orgName) setOrgName(s.org.orgName);
+          if (s.org.orgEmail) setOrgEmail(s.org.orgEmail);
+          if (s.org.orgPhone) setOrgPhone(s.org.orgPhone);
+        }
+        if (s.fees) {
+          if (s.fees.didiFee != null) setDidiFee(String(s.fees.didiFee));
+          if (s.fees.maaFee != null) setMaaFee(String(s.fees.maaFee));
+          if (s.fees.teacherFee != null) setTeacherFee(String(s.fees.teacherFee));
+        }
+      }
+    });
+  }, []);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    api.saveSettings({
+      org: { orgName, orgEmail, orgPhone },
+      fees: { didiFee: Number(didiFee) || 0, maaFee: Number(maaFee) || 0, teacherFee: Number(teacherFee) || 0 },
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

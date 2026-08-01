@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode } from '../../types';
+import * as api from '../../lib/api';
 import { Layout, Save, CheckCircle } from 'lucide-react';
 
 interface AdminCMSPageProps {
@@ -11,8 +12,17 @@ export const AdminCMSPage: React.FC<AdminCMSPageProps> = ({ onNavigate }) => {
   const [heroSubtitle, setHeroSubtitle] = useState('Join Astha Foundation as an Astha Didi, Astha Maa, or Teacher. Together we build self-reliance and education across India.');
   const [saved, setSaved] = useState(false);
 
+  // Live CMS content from Supabase — fallback to defaults
+  useEffect(() => {
+    api.fetchCmsContent().then((c) => {
+      setHeroTitle(c.heroTitle);
+      setHeroSubtitle(c.heroSubtitle);
+    });
+  }, []);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    api.saveCmsContent({ heroTitle, heroSubtitle });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

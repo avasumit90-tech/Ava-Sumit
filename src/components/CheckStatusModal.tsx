@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApplicationStatus } from '../types';
 import { INITIAL_APPLICATIONS } from '../data';
+import * as api from '../lib/api';
 import { Search, X, CheckCircle2, Clock, AlertCircle, FileText, UserCheck, Sparkles } from 'lucide-react';
 
 interface CheckStatusModalProps {
@@ -16,19 +17,23 @@ export const CheckStatusModal: React.FC<CheckStatusModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchId.trim()) return;
-    const found = applicationsList.find(app => app.id.toLowerCase().trim() === searchId.toLowerCase().trim());
-    setSearchedApp(found || null);
+    // Live Supabase lookup (registration_status view) — fallback to local list
+    const found = await api.checkApplicationStatus(searchId)
+      ?? applicationsList.find(app => app.id.toLowerCase().trim() === searchId.toLowerCase().trim())
+      ?? null;
+    setSearchedApp(found);
     setHasSearched(true);
   };
 
   const fillSample = (id: string) => {
     setSearchId(id);
-    const found = applicationsList.find(app => app.id === id);
-    setSearchedApp(found || null);
-    setHasSearched(true);
+    api.checkApplicationStatus(id).then(found => {
+      setSearchedApp(found || applicationsList.find(app => app.id === id) || null);
+      setHasSearched(true);
+    });
   };
 
   return (

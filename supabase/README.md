@@ -13,7 +13,8 @@ aur demo seed data. Sab kuch **tested** hai (PostgreSQL 17 par run karke verify 
 | `supabase/complete-setup.sql` | ⭐ **Yahi use karo** — schema + seed ek saath. SQL Editor me paste karke Run. |
 | `supabase/schema.sql` | Sirf schema (tables, RLS, triggers, storage) |
 | `supabase/seed.sql` | Sirf demo data (app ke INITIAL_* data se matching) |
-| `supabase/client-example.ts` | React app me Supabase connect karne ka example |
+| `src/lib/supabase.ts` | ⭐ App ka live Supabase client (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY se) |
+| `src/lib/api.ts` | ⭐ Data layer — saare DB calls (users, projects, applications, donations, admin modules) mock-fallback ke saath |
 
 ---
 
@@ -54,8 +55,25 @@ SUPABASE_URL="https://xxxx.supabase.co"
 SUPABASE_ANON_KEY="eyJhbGciOi..."
 ```
 
-3. `client-example.ts` ko `src/lib/supabase.ts` me rakh kar use karo
-   (README ke neeche example queries bhi hain).
+3. App me `src/lib/supabase.ts` + `src/lib/api.ts` pehle se ready hain —
+   bas `.env` me vars set karo (ya Vercel → Environment Variables), sab live ho jayega.
+   `README.md` ke neeche example queries bhi hain.
+
+### 🚀 Deploy (Vercel)
+
+```bash
+# Vercel me: repo import karo, Vite auto-detect ho jayega
+# Build:  npm run build   →  Output: dist
+# Environment Variables (Settings → Environment Variables):
+VITE_SUPABASE_URL="https://YOUR-PROJECT-REF.supabase.co"
+VITE_SUPABASE_ANON_KEY="YOUR_ANON_PUBLIC_KEY"
+```
+
+**Admin login:** Navbar me "Admin Login" button — `test@asthafoundation.org`
+(test admin) ya apna invited admin account use karo. Login hone par admin
+panels live database se data dikhayenge. Bina login ke app demo/mock data
+me chalti hai (public site hamesha live: projects, gallery, partners, legal,
+CMS, settings, status-check, registration, donation).
 
 ---
 
