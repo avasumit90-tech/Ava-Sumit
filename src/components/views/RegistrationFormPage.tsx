@@ -4,6 +4,7 @@ import { User, GraduationCap, Briefcase, FileCheck, ArrowLeft, ArrowRight, Save,
 import { EducationAndSkillsForm } from '../EducationAndSkillsForm';
 import { ExperienceForm } from '../ExperienceForm';
 import { DocumentUploadForm } from '../DocumentUploadForm';
+import { PreviewModal } from '../PreviewModal';
 
 interface RegistrationFormPageProps {
   selectedRole: RoleType;
@@ -19,6 +20,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [submittedAppId, setSubmittedAppId] = useState<string | null>(null);
   const [draftNotice, setDraftNotice] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const roleTitles: Record<RoleType, string> = {
     didi: 'Astha Didi (Female Student Mentor)',
@@ -100,8 +102,10 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     setTimeout(() => setDraftNotice(false), 3000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     if (!formData.termsAccepted) {
       alert('Please agree to the Terms and Conditions to submit your application.');
       return;
@@ -123,13 +127,20 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     setSubmittedAppId(newId);
   };
 
-  const steps = [
-    { number: 1, title: 'Personal Details', icon: <User className="w-4 h-4" /> },
-    { number: 2, title: 'Education & Skills', icon: <GraduationCap className="w-4 h-4" /> },
-    { number: 3, title: 'Experience & Interest', icon: <Briefcase className="w-4 h-4" /> },
-    { number: 4, title: 'Documents & Photo', icon: <FileCheck className="w-4 h-4" /> }
-  ];
+  const activeSteps = selectedRole === 'student'
+    ? [
+        { number: 1, title: 'Student Details', icon: <User className="w-4 h-4" /> },
+        { number: 4, title: 'Documents & Photo', icon: <FileCheck className="w-4 h-4" /> }
+      ]
+    : [
+        { number: 1, title: 'Personal Details', icon: <User className="w-4 h-4" /> },
+        { number: 2, title: 'Education & Skills', icon: <GraduationCap className="w-4 h-4" /> },
+        { number: 3, title: 'Experience & Interest', icon: <Briefcase className="w-4 h-4" /> },
+        { number: 4, title: 'Documents & Photo', icon: <FileCheck className="w-4 h-4" /> }
+      ];
 
+  const currentStepIndex = activeSteps.findIndex(s => s.number === currentStep) >= 0 ? activeSteps.findIndex(s => s.number === currentStep) : 0;
+  
   if (submittedAppId) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center space-y-6">
@@ -255,8 +266,8 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-950/5 via-amber-500/5 to-transparent pointer-events-none" />
         <nav aria-label="Progress">
-          <ol className="grid grid-cols-2 md:grid-cols-4 gap-4" role="list">
-            {steps.map((step) => {
+          <ol className={`grid gap-4 ${selectedRole === 'student' ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'}`} role="list">
+            {activeSteps.map((step) => {
               const isActive = currentStep === step.number;
               const isDone = currentStep > step.number;
 
@@ -305,21 +316,86 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Full Name */}
-              <div className={selectedRole === 'coordinator' ? 'md:col-span-1' : 'md:col-span-2'}>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">
-                  Full Name *
-                </label>
-                <input
-                  id="fullName"
-                  type="text"
-                  required
-                  placeholder="e.g. Anjali Sharma"
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
-                />
-              </div>
+              {selectedRole === 'student' ? (
+                <>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">Name of student *</label>
+                    <input id="fullName" type="text" required value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fatherHusbandName">Father name *</label>
+                    <input id="fatherHusbandName" type="text" required value={formData.fatherHusbandName || ''} onChange={(e) => handleInputChange('fatherHusbandName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="motherName">Mother name *</label>
+                    <input id="motherName" type="text" required value={formData.motherName || ''} onChange={(e) => handleInputChange('motherName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="village">VILL- *</label>
+                    <input id="village" type="text" required value={formData.village || ''} onChange={(e) => handleInputChange('village', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="postOffice">Post office *</label>
+                    <input id="postOffice" type="text" required value={formData.postOffice || ''} onChange={(e) => handleInputChange('postOffice', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="blockName">Block *</label>
+                    <input id="blockName" type="text" required value={formData.blockName || ''} onChange={(e) => handleInputChange('blockName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="districtName">District *</label>
+                    <input id="districtName" type="text" required value={formData.districtName || ''} onChange={(e) => handleInputChange('districtName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="state">State *</label>
+                    <input id="state" type="text" required value={formData.state || ''} onChange={(e) => handleInputChange('state', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="motherPhoneNumber">Mother phone number *</label>
+                    <input id="motherPhoneNumber" type="tel" required value={formData.motherPhoneNumber || ''} onChange={(e) => handleInputChange('motherPhoneNumber', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="guardianEmail">Gurdian mail id</label>
+                    <input id="guardianEmail" type="email" value={formData.guardianEmail || ''} onChange={(e) => handleInputChange('guardianEmail', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="schoolName">School name *</label>
+                    <input id="schoolName" type="text" required value={formData.schoolName || ''} onChange={(e) => handleInputChange('schoolName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="studentClass">Class *</label>
+                    <input id="studentClass" type="text" required value={formData.studentClass || ''} onChange={(e) => handleInputChange('studentClass', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="aadharNumber">Adhar number *</label>
+                    <input id="aadharNumber" type="text" required value={formData.aadharNumber || ''} onChange={(e) => handleInputChange('aadharNumber', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="centreAddress">Centre address *</label>
+                    <textarea id="centreAddress" rows={2} required value={formData.centreAddress || ''} onChange={(e) => handleInputChange('centreAddress', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white resize-y" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="teacherName">Teacher name *</label>
+                    <input id="teacherName" type="text" required value={formData.teacherName || ''} onChange={(e) => handleInputChange('teacherName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Full Name */}
+                  <div className={selectedRole === 'coordinator' ? 'md:col-span-1' : 'md:col-span-2'}>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">
+                      Full Name *
+                    </label>
+                    <input
+                      id="fullName"
+                      type="text"
+                      required
+                      placeholder="e.g. Anjali Sharma"
+                      value={formData.fullName}
+                      onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
+                    />
+                  </div>
 
               {/* Father / Husband Name (Coordinator) */}
               {selectedRole === 'coordinator' && (
@@ -525,6 +601,8 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   </div>
                 </>
               )}
+              </>
+              )}
             </div>
           </div>
         )}
@@ -614,20 +692,20 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
           </button>
 
           <div className="flex items-center gap-3">
-            {currentStep > 1 && (
+            {currentStepIndex > 0 && (
               <button
                 type="button"
-                onClick={() => setCurrentStep(prev => prev - 1)}
+                onClick={() => setCurrentStep(activeSteps[currentStepIndex - 1].number)}
                 className="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
               >
                 Previous
               </button>
             )}
 
-            {currentStep < 4 ? (
+            {currentStepIndex < activeSteps.length - 1 ? (
               <button
                 type="button"
-                onClick={() => setCurrentStep(prev => prev + 1)}
+                onClick={() => setCurrentStep(activeSteps[currentStepIndex + 1].number)}
                 className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <span>Next Step</span>
@@ -635,11 +713,13 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
               </button>
             ) : (
               <button
-                type="submit"
-                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold px-8 py-3.5 rounded-xl text-xs shadow-lg shadow-orange-500/20 transition-all cursor-pointer flex items-center gap-2"
+                type="button"
+                onClick={() => setShowPreviewModal(true)}
+                disabled={!formData.termsAccepted}
+                className={`bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold px-8 py-3.5 rounded-xl text-xs shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 ${!formData.termsAccepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Submit Application</span>
+                <span>Preview & Submit</span>
               </button>
             )}
           </div>
@@ -648,6 +728,15 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
       </form>
 
+      <PreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        onSubmit={() => {
+          setShowPreviewModal(false);
+          handleSubmit();
+        }}
+        data={formData}
+      />
     </div>
   );
 };

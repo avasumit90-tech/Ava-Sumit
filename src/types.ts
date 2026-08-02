@@ -85,6 +85,17 @@ export interface RegistrationFormData {
   communicationAddress?: string;
   districtName?: string;
   blockName?: string;
+  motherName?: string;
+  village?: string;
+  postOffice?: string;
+  state?: string;
+  motherPhoneNumber?: string;
+  guardianEmail?: string;
+  schoolName?: string;
+  studentClass?: string;
+  aadharNumber?: string;
+  centreAddress?: string;
+  teacherName?: string;
   passportPhoto: string | null;
   qualification: string;
   computerExperience?: string;
