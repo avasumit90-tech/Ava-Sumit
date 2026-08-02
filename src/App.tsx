@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode, RoleType, UserRecord, ProjectItem, ApplicationStatus } from './types';
 import { ASSETS } from './data';
 import { useDatabase } from './hooks/useDatabase';
@@ -33,6 +33,19 @@ export function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('home');
   const [selectedRole, setSelectedRole] = useState<RoleType>('didi');
   const [isCheckStatusOpen, setIsCheckStatusOpen] = useState(false);
+  // Certificate ID extracted from a direct share link, e.g. /verify/AST-24-091
+  const [initialVerifyCertId, setInitialVerifyCertId] = useState<string | null>(null);
+
+  // On first load, detect a direct certificate verification link (/verify/<ID>)
+  // and route the user straight to the Certificates page with the modal open.
+  useEffect(() => {
+    const path = window.location.pathname || '';
+    const match = path.match(/^\/verify\/([A-Za-z0-9\-]+)\/?$/);
+    if (match) {
+      setInitialVerifyCertId(match[1]);
+      setCurrentView('user-certificates');
+    }
+  }, []);
   
   // Custom Database Hook (Supabase + Local Fallback)
   const {
@@ -275,6 +288,7 @@ export function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <UserCertificatesPage
               onNavigate={handleNavigate}
+              initialVerifyCertId={initialVerifyCertId}
             />
           </div>
         )}

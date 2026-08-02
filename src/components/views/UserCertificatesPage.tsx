@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewMode } from '../../types';
 import { ASSETS } from '../../data';
 import { 
@@ -8,6 +8,7 @@ import {
   Search, 
   Filter, 
   CheckCircle2, 
+  Loader2,
   Sparkles, 
   Star, 
   FolderCheck, 
@@ -24,6 +25,8 @@ import {
 
 interface UserCertificatesPageProps {
   onNavigate: (view: ViewMode) => void;
+  /** Certificate ID passed in from a direct share link (/verify/<ID>). */
+  initialVerifyCertId?: string | null;
 }
 
 interface CertificateData {
@@ -98,7 +101,7 @@ const INITIAL_CERTIFICATES: CertificateData[] = [
   }
 ];
 
-export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNavigate }) => {
+export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNavigate, initialVerifyCertId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -108,6 +111,21 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
   const [shareCert, setShareCert] = useState<CertificateData | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // If we were opened from a direct /verify/<ID> link, auto-open the matching
+  // certificate in the preview/verification modal once the component mounts.
+  useEffect(() => {
+    if (!initialVerifyCertId) return;
+    const matched = INITIAL_CERTIFICATES.find(
+      (c) => c.certId.toLowerCase() === initialVerifyCertId.toLowerCase()
+    );
+    if (matched) {
+      setSelectedCertForPreview(matched);
+    } else {
+      showToast(`Certificate ${initialVerifyCertId} not found.`);
+    }
+  }, [initialVerifyCertId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -127,9 +145,14 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
   });
 
   const handleDownload = (cert: CertificateData) => {
+    // Guard against double-clicks while a download is already in progress.
+    if (isDownloading) return;
+    setIsDownloading(true);
     showToast(`Preparing certificate ${cert.certId} for download...`);
 
     // Render the certificate to an offscreen canvas and download it as an image.
+    // try/catch/finally guarantees isDownloading is always reset so the button
+    // never gets stuck on the "Downloading..." state, even if an error occurs.
     try {
       const W = 1600;
       const H = 1130;
@@ -276,6 +299,9 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
     } catch (err) {
       console.error('Download failed', err);
       showToast('Download failed. Please try again.');
+    } finally {
+      // Always reset the loading state so the UI never stays stuck.
+      setIsDownloading(false);
     }
   };
 
@@ -492,10 +518,11 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
 
                       <button
                         onClick={() => handleDownload(cert)}
-                        className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
+                        disabled={isDownloading}
+                        className="bg-amber-500 hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download Certificate</span>
+                        {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        <span>{isDownloading ? 'Downloading...' : 'Download Certificate'}</span>
                       </button>
 
                       <button
@@ -554,10 +581,11 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleDownload(cert)}
-                        className="p-2 text-slate-700 hover:bg-amber-100 hover:text-amber-800 rounded-xl transition-colors cursor-pointer"
-                        title="Download Certificate"
+                        disabled={isDownloading}
+                        className="p-2 text-slate-700 hover:bg-amber-100 hover:text-amber-800 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={isDownloading ? 'Downloading...' : 'Download Certificate'}
                       >
-                        <Download className="w-4 h-4" />
+                        {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={() => setShareCert(cert)}
@@ -627,6 +655,7 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
                     <img
                       src={ASSETS.logoCircle}
                       alt="Astha Foundation Logo"
+                      crossOrigin="anonymous"
                       className="w-14 h-14 rounded-full border border-slate-300"
                     />
                     <div>
@@ -707,10 +736,11 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
 
                 <button
                   onClick={() => handleDownload(selectedCertForPreview)}
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  disabled={isDownloading}
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 text-xs font-extrabold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>Download Certificate</span>
+                  {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  <span>{isDownloading ? 'Downloading...' : 'Download Certificate'}</span>
                 </button>
               </div>
             </div>
