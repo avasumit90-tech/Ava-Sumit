@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import QRCode from 'react-qr-code';
 import { ASSETS } from '../../data';
-import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt } from 'lucide-react';
+import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt, Smartphone } from 'lucide-react';
 
 export const DonatePage: React.FC = () => {
   const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
@@ -236,7 +237,7 @@ export const DonatePage: React.FC = () => {
                 />
               </div>
 
-              {/* Payment Method Selector */}
+              {/* Payment Gateway Method */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700">Payment Gateway Method</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -269,6 +270,26 @@ export const DonatePage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* UPI QR Code Section */}
+              {paymentMethod === 'upi' && selectedTotal > 0 && (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="inline-flex items-center justify-center p-3 bg-white rounded-xl shadow-sm border border-slate-100 mb-2">
+                    <QRCode
+                      value={`upi://pay?pa=donations@ngo&pn=Astha%20Foundation&am=${selectedTotal}&cu=INR`}
+                      size={180}
+                      level="H"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-2 text-slate-700 font-bold">
+                      <Smartphone className="w-5 h-5 text-blue-600" />
+                      <span>Scan & Pay with any UPI App</span>
+                    </div>
+                    <p className="text-xs text-slate-500">Google Pay, PhonePe, Paytm, BHIM</p>
+                  </div>
+                </div>
+              )}
 
               {/* Submit CTA */}
               <button
