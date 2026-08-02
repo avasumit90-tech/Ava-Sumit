@@ -5,6 +5,7 @@ import { EducationAndSkillsForm } from '../EducationAndSkillsForm';
 import { ExperienceForm } from '../ExperienceForm';
 import { DocumentUploadForm } from '../DocumentUploadForm';
 import { PreviewModal } from '../PreviewModal';
+import { saveRegistrationFormDataDocs } from '../../utils/documentStorage';
 
 interface RegistrationFormPageProps {
   selectedRole: RoleType;
@@ -217,6 +218,14 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
       totalSteps: 4,
       remarks: 'Application submitted successfully. Background verification pending.'
     };
+
+    // Save uploaded documents to persistent Mock Cloud Storage Vault
+    saveRegistrationFormDataDocs(
+      newId,
+      formData.fullName || 'Anonymous Applicant',
+      formData.email || `${(formData.fullName || 'applicant').toLowerCase().replace(/\s+/g, '.')}@example.com`,
+      formData
+    );
 
     // Remove saved draft from localStorage upon submission
     try {

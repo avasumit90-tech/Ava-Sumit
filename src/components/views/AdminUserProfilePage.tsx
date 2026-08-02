@@ -7,6 +7,7 @@ import {
   User, Check, ChevronRight, Download, Plus, LayoutDashboard, Folder, Group,
   ShieldCheck, UserCheck, LogOut, Search, Bell, Settings
 } from 'lucide-react';
+import { UserDocumentDrive } from '../UserDocumentDrive';
 
 interface AdminUserProfilePageProps {
   user?: UserRecord | null;
@@ -505,6 +506,16 @@ export const AdminUserProfilePage: React.FC<AdminUserProfilePageProps> = ({
 
             </div>
 
+          </section>
+
+          {/* 4. User Cloud Storage Vault & Verified Documents Section */}
+          <section className="pt-2">
+            <UserDocumentDrive
+              userId={activeUser.id}
+              userName={activeUser.name}
+              userEmail={activeUser.email}
+              isAdminView={true}
+            />
           </section>
 
         </main>

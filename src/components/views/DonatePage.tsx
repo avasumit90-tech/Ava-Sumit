@@ -1,21 +1,46 @@
 import React, { useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ASSETS } from '../../data';
-import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt, Smartphone, Copy, Check, QrCode as QrIcon } from 'lucide-react';
+import { 
+  Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, 
+  Award, Receipt, Smartphone, Copy, Check, QrCode as QrIcon, Upload, Clock, Image as ImageIcon, 
+  AlertCircle, Calculator, BookOpen, Utensils, Laptop, Users, Sliders, Gift
+} from 'lucide-react';
+import { saveDonationSubmission, DonationSubmission } from '../../utils/donationStorage';
 
 export const DonatePage: React.FC = () => {
   const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
   const [amount, setAmount] = useState<number>(2500);
   const [customAmount, setCustomAmount] = useState<string>('');
+  const [calcAmount, setCalcAmount] = useState<number>(2500);
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
   const [donorPan, setDonorPan] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
+  const [transactionId, setTransactionId] = useState('');
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [screenshotFileName, setScreenshotFileName] = useState<string>('');
+  const [submittedDonation, setSubmittedDonation] = useState<DonationSubmission | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
 
   const selectedTotal = customAmount ? parseFloat(customAmount) || 0 : amount;
   const upiVpa = 'eazypay.C6A8PP6551YPU1E@icici';
+
+  // Calculator Metrics
+  const schoolKits = Math.floor(calcAmount / 500);
+  const meals = Math.floor(calcAmount / 50);
+  const labDays = Math.floor(calcAmount / 250);
+  const mentorHours = Math.floor(calcAmount / 200);
+
+  const applyCalcToDonation = (val: number) => {
+    setAmount(val);
+    setCustomAmount('');
+    const formElement = document.getElementById('donation-widget-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiVpa);
@@ -23,9 +48,37 @@ export const DonatePage: React.FC = () => {
     setTimeout(() => setCopiedUpi(false), 2000);
   };
 
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setScreenshotFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setScreenshotPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleDonate = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedTotal <= 0) return;
+
+    const txnIdToSave = transactionId.trim() || `TXN-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+
+    const record = saveDonationSubmission({
+      donorName: donorName || 'Valued Donor',
+      email: donorEmail || 'donor@example.com',
+      amount: selectedTotal,
+      transactionId: txnIdToSave,
+      screenshotUrl: screenshotPreview || 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
+      paymentMethod,
+      donorPan,
+      status: 'Pending (24 Hours)',
+      remarks: 'Uploaded by donor via QR payment submission. Pending Admin approval within 24 hours.'
+    });
+
+    setSubmittedDonation(record);
     setIsSuccess(true);
   };
 
@@ -48,9 +101,136 @@ export const DonatePage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* LEFT COLUMN: Why Support & Impact Quote */}
+        {/* LEFT COLUMN: Why Support & Impact Calculator */}
         <div className="lg:col-span-7 space-y-8">
           
+          {/* Interactive Donation Impact Calculator Card */}
+          <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-emerald-500/10 rounded-3xl p-6 sm:p-8 border-2 border-amber-300/80 shadow-md space-y-6 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/60 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                    <Calculator className="w-3 h-3" />
+                    Interactive Tool
+                  </span>
+                  <span className="text-xs text-amber-800 font-semibold">Real-Time Impact Engine</span>
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+                  <span>Donation Impact Calculator</span>
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Slide or choose an amount to calculate the exact community benefits your contribution creates.
+                </p>
+              </div>
+
+              <div className="bg-white px-4 py-2 rounded-2xl border border-amber-200 shadow-2xs text-center shrink-0">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase block">Selected Goal</span>
+                <span className="text-xl font-black text-amber-600">₹{calcAmount.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            {/* Slider & Presets Controls */}
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center text-xs font-bold text-slate-700 mb-2">
+                  <span>Adjust Contribution Slider</span>
+                  <span className="text-amber-700 font-mono font-extrabold">₹{calcAmount.toLocaleString('en-IN')}</span>
+                </div>
+                <input
+                  type="range"
+                  min="200"
+                  max="50000"
+                  step="100"
+                  value={calcAmount}
+                  onChange={(e) => setCalcAmount(Number(e.target.value))}
+                  className="w-full h-3 bg-amber-100 rounded-lg appearance-none cursor-pointer accent-amber-600 focus:outline-none"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-1">
+                  <span>₹200</span>
+                  <span>₹10,000</span>
+                  <span>₹25,000</span>
+                  <span>₹50,000+</span>
+                </div>
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="text-xs font-bold text-slate-600 mr-1 flex items-center gap-1">
+                  <Sliders className="w-3.5 h-3.5 text-amber-600" /> Quick Amounts:
+                </span>
+                {[500, 1500, 2500, 5000, 10000, 25000].map((preset) => (
+                  <button
+                    type="button"
+                    key={preset}
+                    onClick={() => setCalcAmount(preset)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
+                      calcAmount === preset
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300 hover:bg-amber-50'
+                    }`}
+                  >
+                    ₹{preset.toLocaleString('en-IN')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Impact Metrics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-amber-200/80 shadow-2xs space-y-1 text-center">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-2">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{schoolKits}</p>
+                <p className="text-xs font-extrabold text-amber-900">School Kits</p>
+                <p className="text-[10px] text-slate-500 leading-tight">₹500 / complete student kit</p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-emerald-200/80 shadow-2xs space-y-1 text-center">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2">
+                  <Utensils className="w-5 h-5" />
+                </div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{meals}</p>
+                <p className="text-xs font-extrabold text-emerald-900">Student Meals</p>
+                <p className="text-[10px] text-slate-500 leading-tight">₹50 / nutritious warm lunch</p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-blue-200/80 shadow-2xs space-y-1 text-center">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto mb-2">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{labDays}</p>
+                <p className="text-xs font-extrabold text-blue-900">Lab Days</p>
+                <p className="text-[10px] text-slate-500 leading-tight">₹250 / day computer lab</p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-purple-200/80 shadow-2xs space-y-1 text-center">
+                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mx-auto mb-2">
+                  <Users className="w-5 h-5" />
+                </div>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{mentorHours}</p>
+                <p className="text-xs font-extrabold text-purple-900">Mentor Hours</p>
+                <p className="text-[10px] text-slate-500 leading-tight">₹200 / hr Astha Didi stipend</p>
+              </div>
+            </div>
+
+            {/* Transfer to Form CTA */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-amber-200">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                <Gift className="w-4 h-4 text-amber-600" />
+                <span>Ready to transform lives with ₹{calcAmount.toLocaleString('en-IN')}?</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => applyCalcToDonation(calcAmount)}
+                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold px-5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
+              >
+                <span>Apply to Donation Form</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
           {/* Why Support Bento Grid */}
           <div className="space-y-4">
             <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
@@ -176,7 +356,7 @@ export const DonatePage: React.FC = () => {
               <Lock className="w-5 h-5 text-emerald-600" />
             </div>
 
-            <form onSubmit={handleDonate} className="space-y-6">
+            <form id="donation-widget-form" onSubmit={handleDonate} className="space-y-6">
               
               {/* Frequency Toggle */}
               <div className="bg-slate-100 p-1 rounded-2xl flex text-xs font-bold">
@@ -245,21 +425,36 @@ export const DonatePage: React.FC = () => {
 
               {/* Impact Progress */}
               {selectedTotal > 0 && (
-                <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 space-y-2">
+                <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 space-y-2.5">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-emerald-900">Your Local Youth Impact</span>
-                    <span className="text-emerald-700 font-medium">{Math.min(100, Math.round((selectedTotal / 10000) * 100))}% of a youth project kit</span>
+                    <span className="font-extrabold text-emerald-950 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+                      Calculated Direct Impact
+                    </span>
+                    <span className="text-emerald-700 font-extrabold font-mono text-[11px]">
+                      ₹{selectedTotal.toLocaleString('en-IN')}
+                    </span>
                   </div>
-                  <div className="w-full bg-emerald-200/50 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-emerald-500 h-full transition-all duration-500 ease-out"
-                      style={{ width: `${Math.min(100, (selectedTotal / 10000) * 100)}%` }}
-                    />
+
+                  <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                    <div className="bg-white/80 p-2 rounded-xl border border-emerald-200/60">
+                      <p className="font-black text-slate-900 text-sm">{Math.floor(selectedTotal / 500)}</p>
+                      <p className="text-[10px] font-bold text-emerald-800">School Kits</p>
+                    </div>
+                    <div className="bg-white/80 p-2 rounded-xl border border-emerald-200/60">
+                      <p className="font-black text-slate-900 text-sm">{Math.floor(selectedTotal / 50)}</p>
+                      <p className="text-[10px] font-bold text-emerald-800">Hot Meals</p>
+                    </div>
+                    <div className="bg-white/80 p-2 rounded-xl border border-emerald-200/60">
+                      <p className="font-black text-slate-900 text-sm">{Math.floor(selectedTotal / 250)}</p>
+                      <p className="text-[10px] font-bold text-emerald-800">Lab Days</p>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-emerald-800 font-medium leading-tight mt-1">
-                    {selectedTotal >= 10000 ? "Amazing! You're fully funding a youth community mentorship program." :
-                     selectedTotal >= 2500 ? "This funds essential study materials and weekend workshops for 5 local youths." :
-                     "Every contribution counts! This provides basic educational supplies for a student."}
+
+                  <p className="text-[10px] text-emerald-800 font-medium leading-tight">
+                    {selectedTotal >= 10000 ? "Amazing! You're fully funding a youth community digital classroom program." :
+                     selectedTotal >= 2500 ? "Your donation provides essential study materials and weekend workshops for 5 local youths." :
+                     "Every contribution counts! This provides basic educational supplies and warm student lunches."}
                   </p>
                 </div>
               )}
@@ -380,6 +575,61 @@ export const DonatePage: React.FC = () => {
                       </button>
                     </div>
 
+                    {/* Transaction ID / UTR Input & Screenshot Upload */}
+                    <div className="space-y-3 pt-2 text-left border-t border-slate-200">
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-800 mb-1">
+                          Transaction ID / UTR Number <span className="text-rose-600">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required={paymentMethod === 'upi'}
+                          placeholder="Enter 12-digit UPI Txn ID / UTR (e.g. 983427185204)"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        <p className="text-[10px] text-slate-500 mt-1">
+                          Enter the reference / UTR transaction ID from your UPI payment app after paying via QR.
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-extrabold text-slate-800 mb-1">
+                          Upload Payment Screenshot <span className="text-rose-600">*</span>
+                        </label>
+                        <div className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-slate-50/70 p-3.5 rounded-xl text-center transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            required={paymentMethod === 'upi'}
+                            onChange={handleScreenshotUpload}
+                            id="payment-screenshot-upload"
+                            className="hidden"
+                          />
+                          <label htmlFor="payment-screenshot-upload" className="cursor-pointer block space-y-1">
+                            {screenshotPreview ? (
+                              <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200">
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                  <img src={screenshotPreview} alt="Screenshot" className="w-8 h-8 rounded object-cover border border-slate-200" />
+                                  <span className="text-xs font-bold text-slate-800 truncate">{screenshotFileName || 'payment_screenshot.png'}</span>
+                                </div>
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-extrabold">Uploaded</span>
+                              </div>
+                            ) : (
+                              <div className="py-1 space-y-1">
+                                <Upload className="w-5 h-5 text-amber-600 mx-auto" />
+                                <p className="text-xs font-extrabold text-slate-800">Click to upload payment screenshot</p>
+                                <p className="text-[10px] text-slate-400">JPG, PNG, PDF up to 5MB</p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Supported Apps Footer Bar */}
+
                     {/* Supported Apps Footer Bar */}
                     <div className="pt-3 border-t border-slate-200">
                       <p className="text-[10px] text-slate-400 font-bold uppercase mb-2">Supported Payment Apps</p>
@@ -392,6 +642,57 @@ export const DonatePage: React.FC = () => {
                         <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded border border-emerald-200">G Pay</span>
                         <span className="bg-sky-50 text-sky-900 px-2 py-0.5 rounded border border-sky-200">Paytm</span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Non-UPI Transaction ID & Screenshot Upload */}
+              {paymentMethod !== 'upi' && selectedTotal > 0 && (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 animate-in fade-in">
+                  <p className="text-xs font-bold text-slate-800">Payment Reference Details</p>
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-800 mb-1">
+                      Transaction / Reference ID
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter Bank / Card Txn Ref Number"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-800 mb-1">
+                      Upload Payment Advice / Receipt Screenshot
+                    </label>
+                    <div className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-white p-3.5 rounded-xl text-center transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleScreenshotUpload}
+                        id="non-upi-screenshot-upload"
+                        className="hidden"
+                      />
+                      <label htmlFor="non-upi-screenshot-upload" className="cursor-pointer block space-y-1">
+                        {screenshotPreview ? (
+                          <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <img src={screenshotPreview} alt="Screenshot" className="w-8 h-8 rounded object-cover border border-slate-200" />
+                              <span className="text-xs font-bold text-slate-800 truncate">{screenshotFileName || 'payment_receipt.png'}</span>
+                            </div>
+                            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-extrabold">Attached</span>
+                          </div>
+                        ) : (
+                          <div className="py-1 space-y-1">
+                            <Upload className="w-5 h-5 text-amber-600 mx-auto" />
+                            <p className="text-xs font-extrabold text-slate-800">Upload payment receipt / screenshot</p>
+                            <p className="text-[10px] text-slate-400">JPG, PNG, PDF up to 5MB</p>
+                          </div>
+                        )}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -413,56 +714,81 @@ export const DonatePage: React.FC = () => {
 
       </div>
 
-      {/* Donation Success Receipt Modal */}
+      {/* Donation Success & 24 Hours Pending Verification Modal */}
       {isSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full border border-slate-200 shadow-2xl space-y-6 text-center">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-8 h-8" />
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-200 shadow-2xl space-y-5 text-center">
+            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl border border-amber-200 flex items-center justify-center mx-auto shadow-inner">
+              <Clock className="w-8 h-8 text-amber-700 animate-pulse" />
             </div>
 
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase">
-                Payment Successful
-              </span>
-              <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">Thank You For Your Support!</h3>
-              <p className="text-xs text-slate-500">Your contribution will transform lives immediately.</p>
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                <Clock className="w-3.5 h-3.5 text-amber-700" />
+                <span>24 Hours Pending - Admin Approval</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Payment Submission Received!</h3>
+              <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+                Thank you! Your donation details and payment screenshot have been safely saved to our database.
+              </p>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-left space-y-3 text-xs">
+            <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 text-left space-y-3 text-xs">
               <div className="flex justify-between border-b border-slate-200 pb-2 font-bold">
-                <span className="text-slate-500">Receipt Ref:</span>
-                <span className="font-mono text-slate-900">AST-REC-{Math.floor(100000 + Math.random() * 900000)}</span>
+                <span className="text-slate-500">Receipt Ref Number:</span>
+                <span className="font-mono text-slate-900">{submittedDonation?.receiptNumber || 'AVA/REC/2026/105'}</span>
               </div>
               <div className="flex justify-between text-slate-700">
                 <span>Donor Name:</span>
-                <span className="font-bold">{donorName || 'Valued Donor'}</span>
+                <span className="font-extrabold text-slate-900">{donorName || 'Valued Donor'}</span>
               </div>
               <div className="flex justify-between text-slate-700">
-                <span>Amount Paid:</span>
-                <span className="font-extrabold text-amber-700">₹{selectedTotal.toLocaleString('en-IN')}</span>
+                <span>Donation Amount:</span>
+                <span className="font-extrabold text-amber-700 text-sm">₹{selectedTotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-slate-700">
-                <span>80G Status:</span>
-                <span className="text-emerald-700 font-bold">Tax Deduction Eligible</span>
+                <span>Transaction ID / UTR:</span>
+                <span className="font-mono font-bold text-blue-900">{submittedDonation?.transactionId || transactionId || 'UPI-983427185204'}</span>
+              </div>
+
+              {screenshotPreview && (
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                  <span className="text-slate-500 font-bold">Payment Screenshot:</span>
+                  <div className="flex items-center gap-2">
+                    <img src={screenshotPreview} alt="Proof" className="w-9 h-9 rounded object-cover border border-slate-300" />
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-extrabold">Attached</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-slate-200 bg-amber-500/10 -mx-4 -mb-4 p-3 rounded-b-2xl border-t-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <p>
+                  <strong>Admin Approval Workflow:</strong> Your payment status will remain <strong>24 Hours Pending</strong> while our team verifies bank credit against your TXT ID. Your official 80G Tax Exemption Certificate will be issued upon approval.
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={() => {
-                  alert('80G Tax Exemption Certificate PDF downloaded to your device!');
+                  alert('Your donation status is currently 24 Hours Pending Admin Verification. Once approved by our team, your 80G Tax Certificate will be ready for download.');
                 }}
-                className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
                 <Download className="w-4 h-4" />
-                <span>Download 80G Tax Receipt</span>
+                <span>Check 80G Status</span>
               </button>
               <button
-                onClick={() => setIsSuccess(false)}
+                onClick={() => {
+                  setIsSuccess(false);
+                  setTransactionId('');
+                  setScreenshotPreview(null);
+                  setScreenshotFileName('');
+                }}
                 className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-5 rounded-xl text-xs transition-colors cursor-pointer"
               >
-                Close
+                Done
               </button>
             </div>
           </div>

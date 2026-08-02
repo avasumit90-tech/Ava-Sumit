@@ -3,6 +3,7 @@ import { ViewMode } from '../../types';
 import { ASSETS } from '../../data';
 import { Award, Clock, Calendar, Download, Sparkles, CheckCircle2, User, BookOpen, ShieldCheck, ArrowRight } from 'lucide-react';
 import { VolunteerLeaderboard } from '../VolunteerLeaderboard';
+import { UserDocumentDrive } from '../UserDocumentDrive';
 
 interface UserDashboardPageProps {
   onNavigate: (view: ViewMode) => void;
@@ -198,6 +199,16 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ onNavigate
         <VolunteerLeaderboard 
           title="Youth Volunteer Honor Roll" 
           compact={false} 
+        />
+      </section>
+
+      {/* Cloud Storage Vault & Uploaded User Documents Section */}
+      <section>
+        <UserDocumentDrive
+          userId="AST-VOL-8820"
+          userName="Sarah Student"
+          userEmail="sarah.student@example.com"
+          isAdminView={false}
         />
       </section>
 
