@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ViewMode, RoleType, UserRecord, ProjectItem, ApplicationStatus, ActivityItem } from './types';
-import { INITIAL_USERS, INITIAL_PROJECTS, INITIAL_APPLICATIONS, INITIAL_ACTIVITIES, ASSETS } from './data';
+import { ViewMode, RoleType, UserRecord, ProjectItem, ApplicationStatus } from './types';
+import { ASSETS } from './data';
+import { useDatabase } from './hooks/useDatabase';
 import { Navbar } from './components/Navbar';
 import { AdminSubMenu } from './components/AdminSubMenu';
 import { Footer } from './components/Footer';
@@ -33,11 +34,20 @@ export function App() {
   const [selectedRole, setSelectedRole] = useState<RoleType>('didi');
   const [isCheckStatusOpen, setIsCheckStatusOpen] = useState(false);
   
-  // Application Data State
-  const [users, setUsers] = useState<UserRecord[]>(INITIAL_USERS);
-  const [projects, setProjects] = useState<ProjectItem[]>(INITIAL_PROJECTS);
-  const [applications, setApplications] = useState<ApplicationStatus[]>(INITIAL_APPLICATIONS);
-  const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);
+  // Custom Database Hook (Supabase + Local Fallback)
+  const {
+    users,
+    projects,
+    applications,
+    activities,
+    addUser,
+    updateUserStatus,
+    deleteUser,
+    addProject,
+    addApplication,
+    addActivity
+  } = useDatabase();
+
   const [selectedUserForCardGen, setSelectedUserForCardGen] = useState<UserRecord | null>(null);
   const [selectedUserProfile, setSelectedUserProfile] = useState<UserRecord | null>(null);
 
@@ -56,65 +66,38 @@ export function App() {
 
   // New Application Submission Handler
   const handleAddApplication = (newApp: ApplicationStatus) => {
-    setApplications(prev => [newApp, ...prev]);
-
-    // Also register in users list
-    const newUser: UserRecord = {
-      id: newApp.id,
-      name: newApp.applicantName,
-      email: `${newApp.applicantName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-      role: newApp.role,
-      location: 'Maharashtra, MH',
-      registrationDate: newApp.submittedDate,
-      status: 'Pending',
-      avatar: ASSETS.rahulIdPhoto
-    };
-    setUsers(prev => [newUser, ...prev]);
-
-    // Add activity log
-    const newAct: ActivityItem = {
-      id: `ACT-${Date.now()}`,
-      title: `${newApp.applicantName} registered for ${newApp.role}`,
-      time: 'Just now',
-      type: 'volunteer',
-      icon: 'person_add'
-    };
-    setActivities(prev => [newAct, ...prev]);
+    addApplication(newApp);
   };
 
   // User Management Actions
   const handleUpdateUserStatus = (id: string, status: 'Active' | 'Pending' | 'Inactive') => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u));
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, status: status === 'Active' ? 'Approved' : 'Under Review' } : a));
+    updateUserStatus(id, status);
   };
 
   const handleDeleteUser = (id: string) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
-    setApplications(prev => prev.filter(a => a.id !== id));
+    deleteUser(id);
   };
 
   const handleAddProject = (newProj: ProjectItem) => {
-    setProjects(prev => [newProj, ...prev]);
-    const newAct: ActivityItem = {
+    addProject(newProj);
+    addActivity({
       id: `ACT-${Date.now()}`,
       title: `Published new project: ${newProj.title}`,
       time: 'Just now',
       type: 'project',
       icon: 'folder_open'
-    };
-    setActivities(prev => [newAct, ...prev]);
+    });
   };
 
   const handleAddUser = (newUser: UserRecord) => {
-    setUsers(prev => [newUser, ...prev]);
-    const newAct: ActivityItem = {
+    addUser(newUser);
+    addActivity({
       id: `ACT-${Date.now()}`,
       title: `Added new member: ${newUser.name} (${newUser.role})`,
       time: 'Just now',
       type: 'volunteer',
       icon: 'person_add'
-    };
-    setActivities(prev => [newAct, ...prev]);
+    });
   };
 
   return (
