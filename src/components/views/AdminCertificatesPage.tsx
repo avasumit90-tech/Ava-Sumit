@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ViewMode, UserRecord } from '../../types';
-import * as api from '../../lib/api';
-import * as dl from '../../lib/download';
 import { Award, Search, Download, Shield, Plus, CheckCircle, QrCode, FileText } from 'lucide-react';
 
 interface AdminCertificatesPageProps {
@@ -25,13 +23,6 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
     { id: 'CERT-502', recipientName: 'Pooja Verma', type: 'Internship Certificate', certificateNumber: 'ASTHA/INT/2026/402', issueDate: '2026-07-20', qrCode: 'VERIFIED-QR-402' },
   ]);
 
-  // Live certificates from Supabase — fallback to demo list
-  useEffect(() => {
-    api.fetchCertificates().then((live) => {
-      if (live && live.length > 0) setCertificates(live as CertificateRecord[]);
-    });
-  }, []);
-
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(users[0]?.name || 'Rahul Kumar');
   const [certType, setCertType] = useState<'Training Certificate' | 'Internship Certificate'>('Training Certificate');
@@ -48,14 +39,6 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
       qrCode: `VERIFIED-QR-${Math.floor(1000 + Math.random() * 9000)}`
     };
 
-    // Live DB me certificate save (agar configured hai)
-    api.addCertificate({
-      recipientName: newCert.recipientName,
-      type: newCert.type,
-      certificateNumber: newCert.certificateNumber,
-      issueDate: newCert.issueDate,
-      qrCode: newCert.qrCode,
-    });
     setCertificates([newCert, ...certificates]);
     setShowGenerateModal(false);
     setActivePreviewCert(newCert);
@@ -221,7 +204,7 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
       {/* Certificate PDF Preview Modal */}
       {activePreviewCert && (
         <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div id="printable-certificate" className="bg-amber-50/90 border-8 border-amber-500 rounded-3xl max-w-3xl w-full p-10 shadow-2xl space-y-6 relative text-center">
+          <div className="bg-amber-50/90 border-8 border-amber-500 rounded-3xl max-w-3xl w-full p-10 shadow-2xl space-y-6 relative text-center">
             <button
               onClick={() => setActivePreviewCert(null)}
               className="absolute top-6 right-6 text-slate-600 hover:text-slate-900 font-black text-xl cursor-pointer bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-md"
@@ -261,28 +244,14 @@ export const AdminCertificatesPage: React.FC<AdminCertificatesPageProps> = ({ on
 
             <div className="pt-2">
               <button
-                onClick={async () => {
-                  const el = document.getElementById('printable-certificate');
-                  if (el) {
-                    await dl.captureElementAsPng(el, `${activePreviewCert.certificateNumber}.png`);
-                  } else {
-                    dl.downloadSimplePdf(
-                      'Certificate of Completion',
-                      [
-                        { label: 'Recipient:', value: activePreviewCert.recipientName },
-                        { label: 'Certificate No:', value: activePreviewCert.certificateNumber },
-                        { label: 'Issue Date:', value: activePreviewCert.issueDate },
-                        { label: 'Issued By:', value: 'Astha Foundation' },
-                      ],
-                      activePreviewCert.certificateNumber
-                    );
-                  }
+                onClick={() => {
+                  alert(`Downloading ${activePreviewCert.certificateNumber}.pdf...`);
                   setActivePreviewCert(null);
                 }}
                 className="bg-blue-950 hover:bg-blue-900 text-white font-black px-8 py-3 rounded-xl text-xs transition-colors cursor-pointer shadow-lg inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4 text-amber-400" />
-                <span>Download Printable Certificate</span>
+                <span>Download Printable PDF Certificate</span>
               </button>
             </div>
           </div>

@@ -222,7 +222,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
                   {/* Funding Bar */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-baseline text-xs font-bold">
-                      <span className="text-slate-900">${project.raised.toLocaleString()} <span className="font-normal text-slate-500">raised</span></span>
+                      <span className="text-slate-900">₹{project.raised.toLocaleString('en-IN')} <span className="font-normal text-slate-500">raised</span></span>
                       <span className="text-amber-600">{percentage}% Funded</span>
                     </div>
 
@@ -234,8 +234,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
                     </div>
 
                     <div className="flex justify-between text-[11px] text-slate-500 font-medium">
-                      <span>Goal: ${project.goal.toLocaleString()}</span>
-                      <span className="text-slate-700 font-semibold">${needed.toLocaleString()} to go</span>
+                      <span>Goal: ₹{project.goal.toLocaleString('en-IN')}</span>
+                      <span className="text-slate-700 font-semibold">₹{needed.toLocaleString('en-IN')} to go</span>
                     </div>
                   </div>
 

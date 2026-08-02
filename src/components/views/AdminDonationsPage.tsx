@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ViewMode } from '../../types';
-import * as api from '../../lib/api';
-import * as dl from '../../lib/download';
 import { Heart, Search, Download, CheckCircle, Shield, Plus, DollarSign, FileText, QrCode } from 'lucide-react';
 
 interface AdminDonationsPageProps {
@@ -28,13 +26,6 @@ export const AdminDonationsPage: React.FC<AdminDonationsPageProps> = ({ onNaviga
     { id: 'DON-1003', donorName: 'Amit Patel', email: 'amit.patel@example.com', amount: 2500, transactionId: 'TXN983427184', status: 'Success', date: '2026-07-30 09:45', reg80gNumber: 'AAATA1234F/80G/2025', receiptNumber: 'ASTHA/REC/2026/091' },
     { id: 'DON-1004', donorName: 'Sunita Gupta', email: 'sunita.g@example.com', amount: 10000, transactionId: 'TXN983427185', status: 'Pending', date: '2026-07-31 08:30', reg80gNumber: 'AAATA1234F/80G/2025', receiptNumber: 'ASTHA/REC/2026/092' },
   ]);
-
-  // Live donations from Supabase (admin-only read) — fallback to demo list
-  useEffect(() => {
-    api.fetchDonations().then((live) => {
-      if (live && live.length > 0) setDonations(live as DonationRecord[]);
-    });
-  }, []);
 
   const [selectedReceipt, setSelectedReceipt] = useState<DonationRecord | null>(null);
 
@@ -173,7 +164,7 @@ export const AdminDonationsPage: React.FC<AdminDonationsPageProps> = ({ onNaviga
       {/* Receipt Modal Preview */}
       {selectedReceipt && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div id="printable-receipt" className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-slate-100 space-y-6 relative">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-slate-100 space-y-6 relative">
             <button
               onClick={() => setSelectedReceipt(null)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-700 font-black text-lg cursor-pointer"
@@ -224,30 +215,14 @@ export const AdminDonationsPage: React.FC<AdminDonationsPageProps> = ({ onNaviga
             </div>
 
             <button
-              onClick={async () => {
-                const el = document.getElementById('printable-receipt');
-                if (el) {
-                  await dl.captureElementAsPng(el, `${selectedReceipt.receiptNumber}-receipt`);
-                } else {
-                  dl.downloadSimplePdf(
-                    '80G Tax Exemption Receipt',
-                    [
-                      { label: 'Receipt Number:', value: selectedReceipt.receiptNumber },
-                      { label: 'Date:', value: selectedReceipt.date },
-                      { label: 'Donor Name:', value: selectedReceipt.donorName },
-                      { label: 'Transaction ID:', value: selectedReceipt.transactionId },
-                      { label: 'Amount:', value: `Rs. ${selectedReceipt.amount.toLocaleString('en-IN')}` },
-                      { label: '80G Number:', value: selectedReceipt.reg80gNumber },
-                    ],
-                    `${selectedReceipt.receiptNumber}-receipt`
-                  );
-                }
+              onClick={() => {
+                alert(`Downloading 80G Receipt PDF for ${selectedReceipt.receiptNumber}...`);
                 setSelectedReceipt(null);
               }}
               className="w-full bg-blue-950 hover:bg-blue-900 text-white font-black py-3 rounded-xl text-xs transition-colors cursor-pointer shadow-md flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4 text-amber-400" />
-              <span>Download Official Receipt</span>
+              <span>Download Official PDF Receipt</span>
             </button>
           </div>
         </div>

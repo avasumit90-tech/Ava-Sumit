@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { ViewMode } from '../types';
 import { ASSETS } from '../data';
-import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award, LogIn, LogOut, UserPlus } from 'lucide-react';
+import { Menu, Heart, Shield, UserCheck, LayoutDashboard, Search, Home, Users, Award } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
 
 interface NavbarProps {
   currentView: ViewMode;
   onNavigate: (view: ViewMode) => void;
   onOpenCheckStatus: () => void;
-  currentUser: { email?: string } | null;
-  onLogout: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenCheckStatus, currentUser, onLogout }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenCheckStatus }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems: { label: string; view: ViewMode; icon: React.ReactNode; badge?: string }[] = [
@@ -107,42 +105,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
               <span>Donate Now</span>
             </button>
 
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onNavigate('user-dashboard')}
-                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
-                  title={currentUser.email}
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="max-w-[120px] truncate">{currentUser.email}</span>
-                </button>
-                <button
-                  onClick={onLogout}
-                  className="flex items-center gap-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer border border-slate-200"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-colors cursor-pointer shadow-md shadow-amber-500/20"
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>Sign Up</span>
-                </button>
-                <button
-                  onClick={() => onNavigate('login')}
-                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
-                >
-                  <LogIn className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Login</span>
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => onNavigate('admin-dashboard')}
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-400" />
+              <span>Admin Login</span>
+            </button>
           </div>
 
           {/* Mobile Hamburger Menu Icon Button */}

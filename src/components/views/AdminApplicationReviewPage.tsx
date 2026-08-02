@@ -197,7 +197,7 @@ export const AdminApplicationReviewPage: React.FC<AdminApplicationReviewPageProp
             ></span>
             {status === 'Pending' ? 'Pending Review' : status}
           </span>
-          <button className="p-2 text-slate-400 hover:text-slate-700 transition-colors rounded-full hover:bg-slate-100 cursor-pointer">
+          <button onClick={() => alert('Options menu coming soon')} className="p-2 text-slate-400 hover:text-slate-700 transition-colors rounded-full hover:bg-slate-100 cursor-pointer">
             <MoreVertical className="w-4 h-4" />
           </button>
         </div>

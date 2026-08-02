@@ -208,7 +208,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </div>
                 </div>
                 <div>
-                  <p className="text-3xl font-black text-slate-900 tracking-tight">$450.2k</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tight">₹450.2k</p>
                   <p className="text-[11px] text-emerald-600 font-bold mt-1">↑ +8% active donations</p>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Target Funding Goal ($)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Target Funding Goal (₹)</label>
                 <input
                   type="number"
                   required

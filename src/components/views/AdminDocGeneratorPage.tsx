@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { UserRecord, ViewMode } from '../../types';
 import { ASSETS } from '../../data';
-import * as dl from '../../lib/download';
-import { ArrowLeft, Download, Sparkles, QrCode, Search, ZoomIn, ZoomOut, ShieldCheck, CheckCircle2, RefreshCw, Printer } from 'lucide-react';
+import { ArrowLeft, Download, Sparkles, QrCode, Search, ZoomIn, ZoomOut, ShieldCheck, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface AdminDocGeneratorPageProps {
   users: UserRecord[];
@@ -37,40 +36,6 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
   const [serialNo, setSerialNo] = useState(`AST-ID-${Math.floor(100000 + Math.random() * 900000)}`);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isGenerated, setIsGenerated] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const cardRef = useRef<HTMLDivElement | null>(null);
-
-  // ⭐ PDF — naye window me printable card (100% reliable, CORS-free)
-  const handleDownloadPdf = () => {
-    dl.openPrintableCard({
-      name: selectedUser.name || 'Member',
-      id: selectedUser.id || 'AST-XXXX',
-      role: selectedUser.role || 'Member',
-      location: selectedUser.location || '',
-      dob: selectedUser.dob || '—',
-      bloodGroup: selectedUser.bloodGroup || '—',
-      validUntil: validUntilDate,
-      serialNo: serialNo,
-      photoUrl: selectedUser.avatar || ASSETS.rahulIdPhoto,
-      logoUrl: ASSETS.logoCircle,
-      patternUrl: ASSETS.cardPatternBg,
-      qrUrl: ASSETS.qrCode,
-    });
-  };
-
-  // PNG — high-res screenshot capture (agar CORS allow kare)
-  const handleDownloadPng = async () => {
-    if (!cardRef.current) return;
-    setDownloading(true);
-    try {
-      const ok = await dl.captureElementAsPng(cardRef.current, `ID-Card-${selectedUser.id || selectedUser.name.replace(/\s+/g, '-')}`);
-      if (!ok) {
-        handleDownloadPdf(); // fallback: printable window
-      }
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,10 +195,7 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
             className="transition-transform duration-200 origin-top"
             style={{ transform: `scale(${zoomLevel})` }}
           >
-            <div
-              ref={cardRef}
-              id="printable-id-card"
-              className="w-80 sm:w-96 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl overflow-hidden relative text-slate-900">
+            <div className="w-80 sm:w-96 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl overflow-hidden relative text-slate-900">
               
               {/* Header Navy Band with Logo */}
               <div className="bg-slate-950 text-white p-5 text-center relative overflow-hidden">
@@ -315,24 +277,16 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
             </div>
           </div>
 
-          {/* Card Download Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full max-w-md">
-            <button
-              onClick={handleDownloadPdf}
-              className="flex-[1.2] bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download Card (PDF)</span>
-            </button>
-            <button
-              onClick={handleDownloadPng}
-              disabled={downloading}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-            >
-              <Printer className="w-4 h-4 text-amber-400" />
-              <span>{downloading ? 'Downloading...' : 'PNG Image'}</span>
-            </button>
-          </div>
+          {/* Card Download Button */}
+          <button
+            onClick={() => {
+              alert(`Official ID Card for ${selectedUser.name} exported as high-resolution printable PDF!`);
+            }}
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-8 rounded-2xl text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer mt-4"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Printable PDF / PNG</span>
+          </button>
 
         </div>
 

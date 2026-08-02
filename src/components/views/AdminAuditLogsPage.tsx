@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import * as api from '../../lib/api';
+import React, { useState } from 'react';
 import { ViewMode } from '../../types';
 import { Shield, Search, Clock, CheckCircle } from 'lucide-react';
 
@@ -23,13 +22,6 @@ export const AdminAuditLogsPage: React.FC<AdminAuditLogsPageProps> = ({ onNaviga
     { id: 'LOG-03', user: 'System', role: 'Automated', action: 'Verified Razorpay donation transaction TXN983427182', timestamp: '2026-07-30 14:20:05', ipAddress: '10.0.0.1' },
     { id: 'LOG-04', user: 'Admin Priya', role: 'Admin', action: 'Uploaded new legal document: 80G Certificate 2026', timestamp: '2026-07-29 09:15:30', ipAddress: '192.168.1.12' },
   ]);
-
-  // Live audit logs from Supabase (admin-only read) — fallback to demo list
-  useEffect(() => {
-    api.fetchAuditLogs().then((live) => {
-      if (live && live.length > 0) setLogs(live as AuditLogRecord[]);
-    });
-  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
 

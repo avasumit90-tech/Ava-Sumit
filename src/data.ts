@@ -202,7 +202,7 @@ export const INITIAL_ACTIVITIES: ActivityItem[] = [
   },
   {
     id: 'ACT-2',
-    title: 'Received $250 donation for Rural Education',
+    title: 'Received ₹2500 donation for Rural Education',
     time: '25 mins ago',
     type: 'donation',
     icon: 'payments'

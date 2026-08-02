@@ -16,8 +16,6 @@ import {
   ChevronRight,
   User,
   ExternalLink,
-  LogIn,
-  UserPlus,
   CheckCircle2
 } from 'lucide-react';
 
@@ -83,8 +81,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     { label: 'Donate', view: 'donate', icon: <Heart className="w-4 h-4 text-rose-400" /> },
     { label: 'My Certificates', view: 'user-certificates', icon: <Award className="w-4 h-4 text-amber-400" /> },
     { label: 'My Dashboard', view: 'user-dashboard', icon: <LayoutDashboard className="w-4 h-4 text-sky-400" /> },
-    { label: 'Login', view: 'login', icon: <LogIn className="w-4 h-4 text-slate-400" /> },
-    { label: 'Sign Up', view: 'signup', icon: <UserPlus className="w-4 h-4 text-amber-400" /> },
     { label: 'Admin Portal', view: 'admin-dashboard', icon: <Shield className="w-4 h-4 text-slate-400" /> },
   ];
 
