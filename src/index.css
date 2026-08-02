@@ -40,3 +40,27 @@
   scrollbar-width: none;
 }
 
+
+/* ===== Form validation styles ===== */
+.field-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+input.field-error:focus,
+textarea.field-error:focus,
+select.field-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+.inline-error {
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+/* Highlight invalid required fields after an attempted submit/navigation */
+form.validation-attempted input:required:invalid,
+form.validation-attempted select:required:invalid,
+form.validation-attempted textarea:required:invalid {
+  border-color: #ef4444 !important;
+}

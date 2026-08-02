@@ -43,7 +43,7 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
         </div>
 
         {/* Profile Photo Section */}
-        <div className="border border-slate-200 rounded-xl p-6 bg-slate-50/50">
+        <div id="doc-passportPhoto" className="border border-slate-200 rounded-xl p-6 bg-slate-50/50">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden shrink-0 relative">
               {data.passportPhoto ? (
@@ -77,7 +77,7 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
         {/* ID Document Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Aadhar / National ID (Front) */}
-          <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
+          <div id="doc-identityFrontDocName" className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
             <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
               <FileText className="w-5 h-5" />
             </div>
@@ -103,7 +103,7 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
           </div>
 
           {/* Aadhar / National ID (Back) */}
-          <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
+          <div id="doc-identityBackDocName" className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
             <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
               <FileText className="w-5 h-5" />
             </div>
@@ -155,7 +155,7 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
           </div>
 
           {/* Address Proof */}
-          <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
+          <div id="doc-addressDocName" className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
             <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
               <FileText className="w-5 h-5" />
             </div>
@@ -184,7 +184,7 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
         <hr className="border-slate-100 my-1" />
 
         {/* Declaration Box */}
-        <div className="bg-amber-500/10 p-4 rounded-xl border border-amber-200/80 flex items-start gap-3">
+        <div id="doc-termsAccepted" className="bg-amber-500/10 p-4 rounded-xl border border-amber-200/80 flex items-start gap-3">
           <input
             type="checkbox"
             id="declaration"

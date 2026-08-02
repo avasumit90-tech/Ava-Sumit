@@ -6,6 +6,7 @@ import { ExperienceForm } from '../ExperienceForm';
 import { DocumentUploadForm } from '../DocumentUploadForm';
 import { PreviewModal } from '../PreviewModal';
 import { saveRegistrationFormDataDocs } from '../../utils/documentStorage';
+import { validateRequiredFields, clearInlineErrors, focusInvalid, insertError } from '../../utils/formValidation';
 
 interface RegistrationFormPageProps {
   selectedRole: RoleType;
@@ -26,6 +27,8 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isRestored, setIsRestored] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
   const roleTitles: Record<RoleType, string> = {
     didi: 'Astha Didi (Female Student Mentor)',
@@ -202,8 +205,15 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     if (e && e.preventDefault) {
       e.preventDefault();
     }
+    // Strict validation before submission: block submit if any required field
+    // is empty/invalid (final step validation also covers the terms checkbox).
+    if (!validateCurrentStep()) {
+      return;
+    }
     if (!formData.termsAccepted) {
-      alert('Please agree to the Terms and Conditions to submit your application.');
+      setAttempted(true);
+      setValidationError('Please agree to the Terms and Conditions to submit your application.');
+      focusInvalid(document.getElementById('doc-termsAccepted'));
       return;
     }
     const newId = `AST-${selectedRole.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -238,8 +248,75 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     setSubmittedAppId(newId);
   };
 
-  const activeSteps = selectedRole === 'student'
-    ? [
+  // Validates the current step's required fields. Returns true if the step is valid.
+  const validateCurrentStep = (): boolean => {
+    const stepEl = document.getElementById(`reg-step-${currentStep}`);
+    let firstInvalid: HTMLElement | null = null;
+    let stepValid = true;
+
+    // 1) Native required fields inside the current step container
+    if (stepEl) {
+      const res = validateRequiredFields(stepEl);
+      firstInvalid = res.firstInvalid;
+      stepValid = res.valid && stepValid;
+    }
+
+    // 2) State-level validation for the Documents & Photo step (file inputs and
+    //    checkboxes are not covered by native `required` validation here).
+    if (currentStep === 4) {
+      const missing: string[] = [];
+      if (!formData.passportPhoto) missing.push('passportPhoto');
+      if (!formData.identityFrontDocName) missing.push('identityFrontDocName');
+      if (selectedRole !== 'student' && !formData.identityBackDocName) missing.push('identityBackDocName');
+      if (!formData.addressDocName) missing.push('addressDocName');
+      if (!formData.termsAccepted) missing.push('termsAccepted');
+
+      missing.forEach((field) => {
+        const el = document.getElementById(`doc-${field}`);
+        if (el) {
+          el.classList.add('field-error');
+          insertError(el, 'This field is required');
+          if (!firstInvalid) firstInvalid = el;
+        }
+      });
+      if (missing.length > 0) stepValid = false;
+    }
+
+    if (!stepValid) {
+      setAttempted(true);
+      setValidationError('Please fill all required fields before proceeding. Fields marked with * are mandatory.');
+      focusInvalid(firstInvalid);
+      return false;
+    }
+
+    setAttempted(false);
+    setValidationError(null);
+    return true;
+  };
+
+  // Advance to the next step only if the current step is valid.
+  const handleNext = () => {
+    if (!validateCurrentStep()) return;
+    const next = activeSteps[currentStepIndex + 1].number;
+    setCurrentStep(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Open the preview modal only after the final step is fully valid.
+  const handleOpenPreview = () => {
+    if (!validateCurrentStep()) return;
+    setShowPreviewModal(true);
+  };
+
+  const handlePrevious = () => {
+    clearInlineErrors(document.getElementById(`reg-step-${currentStep}`) as HTMLElement);
+    setValidationError(null);
+    const prev = activeSteps[currentStepIndex - 1].number;
+    setCurrentStep(prev);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const activeSteps = selectedRole === 'student'    ? [
         { number: 1, title: 'Student Details', icon: <User className="w-4 h-4" /> },
         { number: 4, title: 'Documents & Photo', icon: <FileCheck className="w-4 h-4" /> }
       ]
@@ -407,13 +484,21 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                 <li key={step.number}>
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(step.number)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    onClick={() => {
+                      // Only allow navigating backward to already-completed steps.
+                      if (step.number >= currentStep) return;
+                      clearInlineErrors(document.getElementById(`reg-step-${currentStep}`) as HTMLElement);
+                      setValidationError(null);
+                      setCurrentStep(step.number);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={step.number > currentStep}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                       isActive
                         ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold shadow-xs'
                         : isDone
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold'
-                        : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold cursor-pointer hover:bg-emerald-100'
+                        : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-black text-xs ${
@@ -434,11 +519,22 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
       </div>
 
       {/* Form Content Area */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
+      <form onSubmit={handleSubmit} className={`bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8 ${attempted ? 'validation-attempted' : ''}`}>
+        
+        {/* Validation Error Banner */}
+        {validationError && (
+          <div className="flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl px-4 py-3">
+            <ShieldAlert className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-extrabold">Validation Error</p>
+              <p className="text-[11px] mt-0.5">{validationError}</p>
+            </div>
+          </div>
+        )}
         
         {/* STEP 1: Personal Details */}
         {currentStep === 1 && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div id={`reg-step-${currentStep}`} className="space-y-6 animate-in fade-in duration-200">
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                 <User className="w-5 h-5 text-amber-600" />
@@ -929,7 +1025,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
         {/* STEP 2: Education & Skills */}
         {currentStep === 2 && (
-          <div className="animate-in fade-in duration-200">
+          <div id={`reg-step-${currentStep}`} className="animate-in fade-in duration-200">
             <EducationAndSkillsForm
               data={{
                 qualification: formData.qualification,
@@ -963,7 +1059,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
         {/* STEP 3: Experience & Interest */}
         {currentStep === 3 && (
-          <div className="animate-in fade-in duration-200">
+          <div id={`reg-step-${currentStep}`} className="animate-in fade-in duration-200">
             <ExperienceForm
               data={{
                 experienceYears: formData.experienceYears,
@@ -981,7 +1077,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
         {/* STEP 4: Documents & Verification */}
         {currentStep === 4 && (
-          <div className="animate-in fade-in duration-200">
+          <div id={`reg-step-${currentStep}`} className="animate-in fade-in duration-200">
             <DocumentUploadForm
               data={{
                 passportPhoto: formData.passportPhoto,
@@ -1029,7 +1125,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
             {currentStepIndex > 0 && (
               <button
                 type="button"
-                onClick={() => setCurrentStep(activeSteps[currentStepIndex - 1].number)}
+                onClick={handlePrevious}
                 className="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
               >
                 Previous
@@ -1039,7 +1135,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
             {currentStepIndex < activeSteps.length - 1 ? (
               <button
                 type="button"
-                onClick={() => setCurrentStep(activeSteps[currentStepIndex + 1].number)}
+                onClick={handleNext}
                 className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <span>Next Step</span>
@@ -1048,9 +1144,8 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
             ) : (
               <button
                 type="button"
-                onClick={() => setShowPreviewModal(true)}
-                disabled={!formData.termsAccepted}
-                className={`bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold px-8 py-3.5 rounded-xl text-xs shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 ${!formData.termsAccepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={handleOpenPreview}
+                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold px-8 py-3.5 rounded-xl text-xs shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Preview & Submit</span>

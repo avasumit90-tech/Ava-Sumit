@@ -62,7 +62,45 @@ export const DonatePage: React.FC = () => {
 
   const handleDonate = (e: React.FormEvent) => {
     e.preventDefault();
+    // Strict validation: block submission until all required fields are valid.
+    const formEl = e.currentTarget as HTMLFormElement;
+    if (formEl) {
+      formEl.classList.add('validation-attempted');
+      if (!formEl.checkValidity()) {
+        formEl.reportValidity();
+        return;
+      }
+    }
     if (selectedTotal <= 0) return;
+
+    // UPI payments must include a transaction ID and payment screenshot.
+    if (paymentMethod === 'upi') {
+      if (!transactionId.trim()) {
+        const tx = document.getElementById('payment-screenshot-upload');
+        const box = document.getElementById('payment-screenshot-upload-box');
+        if (box) {
+          box.classList.add('field-error');
+          const p = document.createElement('p');
+          p.className = 'inline-error';
+          p.textContent = 'Please enter the Transaction ID / UTR number';
+          box.insertAdjacentElement('afterend', p);
+        }
+        if (tx) tx.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (!screenshotPreview) {
+        const box = document.getElementById('payment-screenshot-upload-box');
+        if (box) {
+          box.classList.add('field-error');
+          const p = document.createElement('p');
+          p.className = 'inline-error';
+          p.textContent = 'Please upload the payment screenshot';
+          box.appendChild(p);
+          box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+    }
 
     const txnIdToSave = transactionId.trim() || `TXN-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
 
@@ -598,7 +636,7 @@ export const DonatePage: React.FC = () => {
                         <label className="block text-xs font-extrabold text-slate-800 mb-1">
                           Upload Payment Screenshot <span className="text-rose-600">*</span>
                         </label>
-                        <div className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-slate-50/70 p-3.5 rounded-xl text-center transition-colors">
+                        <div id="payment-screenshot-upload-box" className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-slate-50/70 p-3.5 rounded-xl text-center transition-colors">
                           <input
                             type="file"
                             accept="image/*,.pdf"

@@ -81,8 +81,20 @@ export const UserDocumentDrive: React.FC<UserDocumentDriveProps> = ({
 
   const handleUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Strict validation: highlight missing required fields instead of silently proceeding.
+    const box = document.getElementById('cloud-file-upload-box');
+    if (box) {
+      box.querySelectorAll('.inline-error').forEach((n) => n.remove());
+      box.classList.remove('field-error');
+    }
     if (!newDocFile && !newDocPreviewUrl) {
-      alert('Please select a file to upload.');
+      if (box) {
+        box.classList.add('field-error');
+        const p = document.createElement('p');
+        p.className = 'inline-error';
+        p.textContent = 'Please select a file to upload';
+        box.appendChild(p);
+      }
       return;
     }
 
@@ -360,10 +372,11 @@ export const UserDocumentDrive: React.FC<UserDocumentDriveProps> = ({
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Select File (PDF, JPG, PNG)</label>
-                <div className="border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
+                <div id="cloud-file-upload-box" className="border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
                   <input
                     type="file"
                     accept="image/*,.pdf"
+                    required
                     onChange={handleFileChange}
                     className="hidden"
                     id="cloud-file-upload"

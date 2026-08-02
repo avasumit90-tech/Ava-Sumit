@@ -18,6 +18,19 @@ export const CheckStatusModal: React.FC<CheckStatusModalProps> = ({ isOpen, onCl
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // Strict validation: do not proceed until an application ID is entered.
+    const formEl = e.currentTarget as HTMLFormElement;
+    const input = formEl.querySelector<HTMLInputElement>('#status-search-input');
+    if (input && !input.value.trim()) {
+      input.classList.add('field-error');
+      const p = document.createElement('p');
+      p.className = 'inline-error';
+      p.textContent = 'This field is required';
+      input.insertAdjacentElement('afterend', p);
+      input.focus({ preventScroll: true });
+      return;
+    }
+    if (input) input.classList.remove('field-error');
     if (!searchId.trim()) return;
     const found = applicationsList.find(app => app.id.toLowerCase().trim() === searchId.toLowerCase().trim());
     setSearchedApp(found || null);
@@ -62,7 +75,9 @@ export const CheckStatusModal: React.FC<CheckStatusModalProps> = ({ isOpen, onCl
             </label>
             <div className="relative">
               <input
+                id="status-search-input"
                 type="text"
+                required
                 placeholder="e.g. AST-2024-8902 or AST-DID-9012"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
