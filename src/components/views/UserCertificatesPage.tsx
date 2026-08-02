@@ -127,7 +127,156 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
   });
 
   const handleDownload = (cert: CertificateData) => {
-    showToast(`Downloading certificate ${cert.certId} as PDF...`);
+    showToast(`Preparing certificate ${cert.certId} for download...`);
+
+    // Render the certificate to an offscreen canvas and download it as an image.
+    try {
+      const W = 1600;
+      const H = 1130;
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        showToast('Sorry, your browser does not support certificate download.');
+        return;
+      }
+
+      const navy = '#172554';
+      const amber = '#f59e0b';
+      const ink = '#0f172a';
+      const muted = '#64748b';
+
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#fef3c7');
+      bg.addColorStop(1, '#fffbeb');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Outer border
+      ctx.strokeStyle = navy;
+      ctx.lineWidth = 18;
+      ctx.strokeRect(50, 50, W - 100, H - 100);
+      ctx.lineWidth = 4;
+      ctx.strokeRect(84, 84, W - 168, H - 168);
+
+      // Header: logo circle + foundation name
+      ctx.fillStyle = navy;
+      ctx.beginPath();
+      ctx.arc(W / 2 - 430, 210, 70, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = amber;
+      ctx.font = 'bold 44px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AVA', W / 2 - 430, 222);
+
+      ctx.fillStyle = navy;
+      ctx.font = 'bold 60px Georgia, serif';
+      ctx.fillText('AVA FOUNDATION', W / 2 + 40, 195);
+      ctx.fillStyle = muted;
+      ctx.font = '22px Georgia, serif';
+      ctx.fillText('Youth Empowerment & Community Trust', W / 2 + 40, 235);
+
+      // Credential ID
+      ctx.textAlign = 'right';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillStyle = amber;
+      ctx.fillText(cert.certId, W - 150, 235);
+      ctx.fillStyle = muted;
+      ctx.font = '16px Georgia, serif';
+      ctx.fillText('Credential ID', W - 150, 258);
+
+      // Body
+      ctx.textAlign = 'center';
+      ctx.fillStyle = muted;
+      ctx.font = '28px Georgia, serif';
+      ctx.fillText('CERTIFICATE OF APPRECIATION & RECOGNITION', W / 2, 420);
+
+      ctx.fillStyle = ink;
+      ctx.font = 'italic 30px Georgia, serif';
+      ctx.fillText('This certificate is proudly presented to', W / 2, 500);
+
+      ctx.fillStyle = navy;
+      ctx.font = 'bold 64px Georgia, serif';
+      ctx.fillText('Anjali Sharma', W / 2, 590);
+      ctx.strokeStyle = amber;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(W / 2 - 260, 615);
+      ctx.lineTo(W / 2 + 260, 615);
+      ctx.stroke();
+
+      ctx.fillStyle = ink;
+      ctx.font = '28px Georgia, serif';
+      ctx.fillText(`Volunteer Lead  |  ${cert.title}`, W / 2, 670);
+
+      // Description wrapped
+      ctx.font = '25px Georgia, serif';
+      ctx.fillStyle = '#334155';
+      const words = cert.description.split(' ');
+      const maxWidth = 1180;
+      const lines: string[] = [];
+      let line = '';
+      for (const w of words) {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxWidth) {
+          lines.push(line);
+          line = w;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      const shown = lines.slice(0, 3).join(' ');
+      ctx.fillText(shown, W / 2, 730);
+      if (lines.length > 3) ctx.fillText('...', W / 2, 765);
+
+      // Bottom: signatures + seal + date
+      ctx.textAlign = 'left';
+      ctx.fillStyle = ink;
+      ctx.font = 'bold 26px Georgia, serif';
+      ctx.fillText(cert.date, 180, 940);
+      ctx.fillStyle = muted;
+      ctx.font = '18px Georgia, serif';
+      ctx.fillText('Date of Issuance', 180, 970);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = ink;
+      ctx.font = 'italic bold 30px Georgia, serif';
+      ctx.fillText('Dr. R. K. Sharma', W - 180, 940);
+      ctx.fillStyle = muted;
+      ctx.font = '18px Georgia, serif';
+      ctx.fillText('Trustee, AVA Foundation', W - 180, 970);
+
+      // Seal
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = navy;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(W / 2, 940, 62, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = navy;
+      ctx.beginPath();
+      ctx.arc(W / 2, 940, 52, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = amber;
+      ctx.font = 'bold 20px Georgia, serif';
+      ctx.fillText('SEAL', W / 2, 945);
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.download = `${cert.certId}-certificate.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast('Certificate downloaded!');
+    } catch (err) {
+      console.error('Download failed', err);
+      showToast('Download failed. Please try again.');
+    }
   };
 
   const handleCopyShareLink = (cert: CertificateData) => {
@@ -346,7 +495,7 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
                         className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
-                        <span>Download PDF</span>
+                        <span>Download Certificate</span>
                       </button>
 
                       <button
@@ -406,7 +555,7 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
                       <button
                         onClick={() => handleDownload(cert)}
                         className="p-2 text-slate-700 hover:bg-amber-100 hover:text-amber-800 rounded-xl transition-colors cursor-pointer"
-                        title="Download PDF"
+                        title="Download Certificate"
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -561,7 +710,7 @@ export const UserCertificatesPage: React.FC<UserCertificatesPageProps> = ({ onNa
                   className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download PDF</span>
+                  <span>Download Certificate</span>
                 </button>
               </div>
             </div>
