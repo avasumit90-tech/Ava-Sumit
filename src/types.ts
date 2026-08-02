@@ -76,13 +76,18 @@ export interface ApplicationStatus {
 export interface RegistrationFormData {
   role: RoleType;
   fullName: string;
+  fatherHusbandName?: string;
   dob: string;
   gender: string;
   phone: string;
   email: string;
   address: string;
+  communicationAddress?: string;
+  districtName?: string;
+  blockName?: string;
   passportPhoto: string | null;
   qualification: string;
+  computerExperience?: string;
   fieldOfStudy: string;
   institution: string;
   completionYear: string;
@@ -100,5 +105,8 @@ export interface RegistrationFormData {
   identityBackDocName?: string | null;
   addressProofType?: string;
   addressDocName?: string | null;
+  accountDetails?: string;
+  emergencyContact?: string;
+  referenceName?: string;
   termsAccepted?: boolean;
 }

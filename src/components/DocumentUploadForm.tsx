@@ -76,14 +76,14 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
 
         {/* ID Document Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Aadhar / National ID */}
+          {/* Aadhar / National ID (Front) */}
           <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
             <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-slate-900">Aadhar / National ID</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Upload front or back side proof</p>
+              <h4 className="text-xs font-bold text-slate-900">Aadhar / National ID (Front)</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">Upload front side proof</p>
               {data.identityFrontDocName && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 mt-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -92,11 +92,37 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
               )}
             </div>
             <label className="mt-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg cursor-pointer transition-colors">
-              <span>{data.identityFrontDocName ? 'Replace ID Document' : 'Click to Upload ID'}</span>
+              <span>{data.identityFrontDocName ? 'Replace Front Side' : 'Upload Front Side'}</span>
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => onFileUpload('identityFrontDocName', e)}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Aadhar / National ID (Back) */}
+          <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Aadhar / National ID (Back)</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">Upload back side proof</p>
+              {data.identityBackDocName && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {data.identityBackDocName}
+                </span>
+              )}
+            </div>
+            <label className="mt-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg cursor-pointer transition-colors">
+              <span>{data.identityBackDocName ? 'Replace Back Side' : 'Upload Back Side'}</span>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => onFileUpload('identityBackDocName', e)}
                 className="hidden"
               />
             </label>
@@ -123,6 +149,32 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => onFileUpload('educationDocName', e)}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Address Proof */}
+          <div className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-xl p-5 transition-colors group bg-white flex flex-col items-center justify-center text-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition-colors">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Address Proof</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">Utility Bill, Passport, etc.</p>
+              {data.addressDocName && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {data.addressDocName}
+                </span>
+              )}
+            </div>
+            <label className="mt-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg cursor-pointer transition-colors">
+              <span>{data.addressDocName ? 'Replace Document' : 'Click to Upload Address Proof'}</span>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => onFileUpload('addressDocName', e)}
                 className="hidden"
               />
             </label>

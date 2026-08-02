@@ -306,7 +306,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Full Name */}
-              <div className="md:col-span-2">
+              <div className={selectedRole === 'coordinator' ? 'md:col-span-1' : 'md:col-span-2'}>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">
                   Full Name *
                 </label>
@@ -320,6 +320,24 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
                 />
               </div>
+
+              {/* Father / Husband Name (Coordinator) */}
+              {selectedRole === 'coordinator' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fatherHusbandName">
+                    Father / Husband Name *
+                  </label>
+                  <input
+                    id="fatherHusbandName"
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Sharma"
+                    value={formData.fatherHusbandName || ''}
+                    onChange={(e) => handleInputChange('fatherHusbandName', e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
+                  />
+                </div>
+              )}
 
               {/* Date of Birth */}
               <div>
@@ -394,7 +412,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
               {/* Permanent Address */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="address">
-                  Residential Address *
+                  {selectedRole === 'coordinator' ? 'Full Address (Permanent) *' : 'Residential Address *'}
                 </label>
                 <textarea
                   id="address"
@@ -406,6 +424,107 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all resize-y"
                 />
               </div>
+
+              {selectedRole === 'coordinator' && (
+                <>
+                  {/* Communication Address */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="communicationAddress">
+                      Communication Address *
+                    </label>
+                    <textarea
+                      id="communicationAddress"
+                      rows={3}
+                      required
+                      placeholder="Enter your communication address..."
+                      value={formData.communicationAddress || ''}
+                      onChange={(e) => handleInputChange('communicationAddress', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all resize-y"
+                    />
+                  </div>
+
+                  {/* Apply District & Block */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="districtName">
+                      Apply District Name *
+                    </label>
+                    <input
+                      id="districtName"
+                      type="text"
+                      required
+                      placeholder="e.g. Pune"
+                      value={formData.districtName || ''}
+                      onChange={(e) => handleInputChange('districtName', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="blockName">
+                      Apply Block Name *
+                    </label>
+                    <input
+                      id="blockName"
+                      type="text"
+                      required
+                      placeholder="e.g. Haveli"
+                      value={formData.blockName || ''}
+                      onChange={(e) => handleInputChange('blockName', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  {/* Emergency Contact & Reference */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="emergencyContact">
+                      Emergency Contact Number *
+                    </label>
+                    <div className="flex rounded-xl overflow-hidden border border-slate-300 focus-within:ring-2 focus-within:ring-blue-900 transition-all">
+                      <span className="inline-flex items-center px-3.5 bg-slate-100 border-r border-slate-300 text-xs font-bold text-slate-600 select-none">
+                        +91
+                      </span>
+                      <input
+                        id="emergencyContact"
+                        type="tel"
+                        required
+                        placeholder="98765 43210"
+                        value={formData.emergencyContact || ''}
+                        onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
+                        className="flex-1 px-4 py-3 bg-slate-50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="referenceName">
+                      Reference Name / Contact *
+                    </label>
+                    <input
+                      id="referenceName"
+                      type="text"
+                      required
+                      placeholder="e.g. Amit Patil (9876543211)"
+                      value={formData.referenceName || ''}
+                      onChange={(e) => handleInputChange('referenceName', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  {/* Account Details */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="accountDetails">
+                      Account Details *
+                    </label>
+                    <textarea
+                      id="accountDetails"
+                      rows={2}
+                      required
+                      placeholder="Enter Bank Name, Account Number, IFSC Code..."
+                      value={formData.accountDetails || ''}
+                      onChange={(e) => handleInputChange('accountDetails', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all resize-y"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -425,6 +544,22 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
               onToggleSkill={(sk) => toggleArrayItem('skills', sk)}
               onToggleLanguage={(lang) => toggleArrayItem('languages', lang)}
             />
+            {selectedRole === 'coordinator' && (
+              <div className="mt-8 border-t border-slate-100 pt-6">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="computerExperience">
+                  Computer Experience *
+                </label>
+                <textarea
+                  id="computerExperience"
+                  rows={3}
+                  required
+                  placeholder="Describe your computer skills and experience (e.g. MS Office, Data Entry, Email, Web Browsing)..."
+                  value={formData.computerExperience || ''}
+                  onChange={(e) => handleInputChange('computerExperience', e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition-all resize-y"
+                />
+              </div>
+            )}
           </div>
         )}
 
