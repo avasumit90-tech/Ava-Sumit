@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { UserRecord, ViewMode } from '../../types';
 import { ASSETS } from '../../data';
+import { IDCardPrintModal } from '../IDCardPrintModal';
 import { 
   Search, Download, CheckCircle, XCircle, Trash2, Filter, Eye, ArrowLeft, 
   Mail, Shield, UserCheck, Sparkles, Plus, Edit2, Ban, Check, ChevronLeft, ChevronRight,
@@ -44,6 +45,7 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
   
   // Modals state
   const [viewingUser, setViewingUser] = useState<UserRecord | null>(null);
+  const [printingUser, setPrintingUser] = useState<UserRecord | null>(null);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
 
@@ -977,18 +979,15 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
                           )}
 
                           {/* ID Card Generator Shortcut */}
-                          {onSelectUserForCardGen && (
-                            <button
-                              onClick={() => {
-                                onSelectUserForCardGen(user);
-                                onNavigate('admin-doc-generator');
-                              }}
-                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                              title="Generate Official ID Card"
-                            >
-                              <Sparkles className="w-4 h-4" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => {
+                              setPrintingUser(user);
+                            }}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                            title="Generate Official ID Card"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                          </button>
 
                           {/* Delete */}
                           <button
@@ -1224,19 +1223,16 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
                   </button>
                 )}
 
-                {onSelectUserForCardGen && (
-                  <button
-                    onClick={() => {
-                      onSelectUserForCardGen(viewingUser);
-                      setViewingUser(null);
-                      onNavigate('admin-doc-generator');
-                    }}
-                    className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-                    <span>Generate ID Card</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setPrintingUser(viewingUser);
+                    setViewingUser(null);
+                  }}
+                  className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                  <span>Generate ID Card</span>
+                </button>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1396,6 +1392,14 @@ export const AdminUserManagementPage: React.FC<AdminUserManagementPageProps> = (
             </form>
           </div>
         </div>
+      )}
+
+      {/* Print ID Card Modal */}
+      {printingUser && (
+        <IDCardPrintModal 
+          user={printingUser}
+          onClose={() => setPrintingUser(null)}
+        />
       )}
 
       {/* Contact Selected Users Modal */}
