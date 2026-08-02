@@ -30,8 +30,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="bg-amber-500 text-slate-950 font-bold px-1.5 py-0.5 rounded text-[10px] tracking-wide uppercase">Official</span>
-            <span className="hidden sm:inline text-slate-300">Astha Foundation — Youth Empowerment & Community Trust Initiative</span>
-            <span className="sm:hidden text-slate-300">Astha Foundation Portal</span>
+            <span className="hidden sm:inline text-slate-300">AVA Foundation — Empowering Youth & Community Trust Initiative</span>
+            <span className="sm:hidden text-slate-300">AVA Foundation Portal</span>
           </div>
           <div className="flex items-center gap-4">
             <button 
@@ -42,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
               <span>Check Application Status</span>
             </button>
             <span className="text-slate-600 hidden md:inline">|</span>
-            <span className="text-slate-400 hidden md:inline">Toll Free: 1800-123-ASTHA</span>
+            <span className="text-slate-400 hidden md:inline">Toll Free: 1800-123-AVA</span>
           </div>
         </div>
       </div>
@@ -59,17 +59,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onOpenC
             <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-slate-900/10 shadow-sm transition-transform group-hover:scale-105 bg-white flex items-center justify-center p-0.5">
               <img 
                 src={ASSETS.logoCircle} 
-                alt="Astha Foundation Logo" 
+                alt="AVA Foundation Logo" 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 group-hover:text-blue-900 transition-colors">
-                  Astha Foundation
+                  AVA FOUNDATION
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium tracking-wide">Empowering Youth & Communities</p>
+              <p className="text-xs text-slate-500 font-semibold tracking-wide">Empowering youth</p>
             </div>
           </div>
 

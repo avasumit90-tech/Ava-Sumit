@@ -12,14 +12,46 @@ interface LegalDoc {
   category: string;
   fileSize: string;
   uploadDate: string;
+  docNumber?: string;
+  issuer?: string;
+  details?: string;
 }
 
 export const AdminLegalPage: React.FC<AdminLegalPageProps> = ({ onNavigate }) => {
   const [docs, setDocs] = useState<LegalDoc[]>([
-    { id: 'LEG-1', title: 'Trust Deed & Registration Certificate', category: 'Registration', fileSize: '2.4 MB', uploadDate: '2025-01-10' },
-    { id: 'LEG-2', title: '80G Tax Exemption Certificate', category: 'Tax Exemption', fileSize: '1.1 MB', uploadDate: '2025-04-15' },
-    { id: 'LEG-3', title: '12A Registration Certificate', category: 'Tax Exemption', fileSize: '980 KB', uploadDate: '2025-04-15' },
-    { id: 'LEG-4', title: 'PAN Card of Astha Foundation', category: 'Tax & Financial', fileSize: '450 KB', uploadDate: '2025-01-12' },
+    { 
+      id: 'LEG-PAN', 
+      title: 'Permanent Account Number (PAN) Card', 
+      category: 'Tax & Financial', 
+      fileSize: '480 KB', 
+      uploadDate: '2019-08-27',
+      docNumber: 'AAHTA5416F',
+      issuer: 'Income Tax Department, Govt. of India',
+      details: 'Incorporation/Formation Date: 27/08/2019 | Name: AVA FOUNDATION'
+    },
+    { 
+      id: 'LEG-MSME', 
+      title: 'Udyog Aadhaar MSME Registration Certificate', 
+      category: 'Govt Registration', 
+      fileSize: '1.2 MB', 
+      uploadDate: '2020-02-13',
+      docNumber: 'AS03D0003712',
+      issuer: 'Ministry of Micro, Small & Medium Enterprises (Govt. of India)',
+      details: 'Enterprise: AVA FOUNDATION | Type: Micro Services (Social Work Activities) | Location: Guwahati, Kamrup Metro, Assam'
+    },
+    { 
+      id: 'LEG-BANK', 
+      title: 'ICICI Bank Current Account & Cancelled Cheque', 
+      category: 'Banking & Audit', 
+      fileSize: '850 KB', 
+      uploadDate: '2020-07-31',
+      docNumber: 'A/C: 413605000147',
+      issuer: 'ICICI Bank Ltd, Hatigaon Branch Guwahati',
+      details: 'IFSC: ICIC0004136 | Business Banking Current Account | A/C Name: AVA FOUNDATION'
+    },
+    { id: 'LEG-1', title: 'Trust Deed & Incorporation Charter', category: 'Registration', fileSize: '2.4 MB', uploadDate: '2019-08-27' },
+    { id: 'LEG-2', title: '80G Tax Exemption Certificate', category: 'Tax Exemption', fileSize: '1.1 MB', uploadDate: '2020-04-15' },
+    { id: 'LEG-3', title: '12A Income Tax Registration', category: 'Tax Exemption', fileSize: '980 KB', uploadDate: '2020-04-15' },
   ]);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -89,12 +121,29 @@ export const AdminLegalPage: React.FC<AdminLegalPageProps> = ({ onNavigate }) =>
             <tbody className="divide-y divide-slate-100 text-xs">
               {docs.map(doc => (
                 <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <span>{doc.title}</span>
+                  <td className="p-4 sm:px-6">
+                    <div className="flex items-start gap-2.5">
+                      <FileText className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                      <div>
+                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                          <span>{doc.title}</span>
+                          {doc.docNumber && (
+                            <span className="font-mono bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded border border-amber-300">
+                              {doc.docNumber}
+                            </span>
+                          )}
+                        </div>
+                        {doc.issuer && (
+                          <p className="text-[11px] text-slate-500 mt-0.5">{doc.issuer}</p>
+                        )}
+                        {doc.details && (
+                          <p className="text-[10px] text-slate-400 font-mono mt-0.5">{doc.details}</p>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="p-4 sm:px-6">
-                    <span className="bg-blue-50 text-blue-800 font-bold px-2.5 py-1 rounded-full text-[10px]">
+                    <span className="bg-blue-50 text-blue-800 font-bold px-2.5 py-1 rounded-full text-[10px] whitespace-nowrap">
                       {doc.category}
                     </span>
                   </td>

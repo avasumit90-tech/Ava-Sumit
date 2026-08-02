@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ASSETS } from '../../data';
-import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt, Smartphone } from 'lucide-react';
+import { Heart, ShieldCheck, Download, CreditCard, Sparkles, CheckCircle2, Lock, ArrowRight, Award, Receipt, Smartphone, Copy, Check, QrCode as QrIcon } from 'lucide-react';
 
 export const DonatePage: React.FC = () => {
   const [frequency, setFrequency] = useState<'once' | 'monthly'>('once');
@@ -12,8 +12,16 @@ export const DonatePage: React.FC = () => {
   const [donorPan, setDonorPan] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
 
   const selectedTotal = customAmount ? parseFloat(customAmount) || 0 : amount;
+  const upiVpa = 'eazypay.C6A8PP6551YPU1E@icici';
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText(upiVpa);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2000);
+  };
 
   const handleDonate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +103,53 @@ export const DonatePage: React.FC = () => {
                   <p className="text-[11px] text-slate-400">Former Beneficiary & Software Engineer</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Official Bank Transfer & Registration Credentials Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-xs">
+                  A/C
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Direct Bank Transfer (NEFT / RTGS / IMPS)</h4>
+                  <p className="text-[11px] text-slate-500">Official ICICI Bank Current Account for Trust Transfers</p>
+                </div>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Verified Account
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Account Holder Name</span>
+                <span className="font-extrabold text-slate-900">AVA FOUNDATION</span>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Bank Name & Branch</span>
+                <span className="font-bold text-slate-900">ICICI Bank, Hatigaon Branch Guwahati</span>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono">
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-sans block">Account Number</span>
+                <span className="font-extrabold text-blue-700 text-sm">413605000147</span>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono">
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-sans block">IFSC Code</span>
+                <span className="font-extrabold text-amber-700 text-sm">ICIC0004136</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-2">
+              <div className="flex items-center gap-3">
+                <span><strong>PAN:</strong> <span className="font-mono text-slate-800 font-bold">AAHTA5416F</span></span>
+                <span><strong>MSME UAM:</strong> <span className="font-mono text-slate-800 font-bold">AS03D0003712</span></span>
+              </div>
+              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" /> 80G Tax Receipt Eligible
+              </span>
             </div>
           </div>
 
@@ -273,20 +328,71 @@ export const DonatePage: React.FC = () => {
 
               {/* UPI QR Code Section */}
               {paymentMethod === 'upi' && selectedTotal > 0 && (
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
-                  <div className="inline-flex items-center justify-center p-3 bg-white rounded-xl shadow-sm border border-slate-100 mb-2">
-                    <QRCode
-                      value={`upi://pay?pa=donations@ngo&pn=Astha%20Foundation&am=${selectedTotal}&cu=INR`}
-                      size={180}
-                      level="H"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-center gap-2 text-slate-700 font-bold">
-                      <Smartphone className="w-5 h-5 text-blue-600" />
-                      <span>Scan & Pay with any UPI App</span>
+                <div className="bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-md animate-in fade-in zoom-in-95 duration-300">
+                  {/* ICICI Bank Header */}
+                  <div className="bg-[#c82a1e] text-white px-5 py-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-white text-[#c82a1e] font-black text-xs flex items-center justify-center italic">
+                        i
+                      </div>
+                      <span className="font-black text-lg tracking-tight font-sans">ICICI Bank</span>
                     </div>
-                    <p className="text-xs text-slate-500">Google Pay, PhonePe, Paytm, BHIM</p>
+                    <span className="text-[10px] font-mono opacity-80 bg-black/20 px-2 py-0.5 rounded">MID: 671241</span>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 text-center space-y-4 bg-white">
+                    <p className="text-sm font-extrabold text-slate-800 tracking-tight">
+                      Scan and Pay with any UPI app
+                    </p>
+
+                    {/* QR Code Frame */}
+                    <div className="relative inline-block bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-xs">
+                      <QRCode
+                        value={`upi://pay?pa=${upiVpa}&pn=AVA%20FOUNDATION&am=${selectedTotal}&cu=INR`}
+                        size={190}
+                        level="H"
+                      />
+                    </div>
+
+                    {/* UPI VPA Details & Copy */}
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-left">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase text-slate-400">Official UPI ID</p>
+                        <p className="text-xs font-mono font-bold text-slate-900 truncate">{upiVpa}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+                      >
+                        {copiedUpi ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="text-emerald-700">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Copy VPA</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Supported Apps Footer Bar */}
+                    <div className="pt-3 border-t border-slate-200">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase mb-2">Supported Payment Apps</p>
+                      <div className="flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-extrabold text-slate-700">
+                        <span className="bg-orange-50 text-orange-900 px-2 py-0.5 rounded border border-orange-200">iMobile Pay</span>
+                        <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">BHIM</span>
+                        <span className="bg-blue-50 text-blue-900 px-2 py-0.5 rounded border border-blue-200">UPI</span>
+                        <span className="bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200">e₹</span>
+                        <span className="bg-indigo-50 text-indigo-900 px-2 py-0.5 rounded border border-indigo-200">PhonePe</span>
+                        <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded border border-emerald-200">G Pay</span>
+                        <span className="bg-sky-50 text-sky-900 px-2 py-0.5 rounded border border-sky-200">Paytm</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

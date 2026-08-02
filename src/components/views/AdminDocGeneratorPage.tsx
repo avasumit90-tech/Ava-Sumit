@@ -210,7 +210,7 @@ export const AdminDocGeneratorPage: React.FC<AdminDocGeneratorPageProps> = ({
                     <img src={ASSETS.logoCircle} alt="Logo" className="w-full h-full object-contain" />
                   </div>
                   <div className="text-left">
-                    <h4 className="text-base font-black tracking-tight uppercase leading-none">Astha Foundation</h4>
+                    <h4 className="text-base font-black tracking-tight uppercase leading-none">AVA FOUNDATION</h4>
                     <p className="text-[9px] text-amber-300 font-bold uppercase tracking-widest mt-1">Official Member Identity Card</p>
                   </div>
                 </div>

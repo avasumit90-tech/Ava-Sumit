@@ -53,15 +53,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white rounded-full p-1 border border-slate-700">
-                <img src={ASSETS.logoCircle} alt="Astha Logo" className="w-full h-full object-contain" />
+                <img src={ASSETS.logoCircle} alt="AVA Foundation Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h4 className="text-xl font-bold text-white tracking-tight">Astha Foundation</h4>
-                <p className="text-xs text-amber-400 font-medium">Youth Empowerment & Community Trust</p>
+                <h4 className="text-xl font-bold text-white tracking-tight">AVA FOUNDATION</h4>
+                <p className="text-xs text-amber-400 font-semibold">Empowering youth</p>
               </div>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              Astha Foundation is dedicated to youth empowerment, education, healthcare accessibility, and community mentorship. registered non-profit organization serving communities since 2019.
+              AVA FOUNDATION is dedicated to empowering youth, education, healthcare accessibility, and community mentorship. Registered non-profit organization serving communities since 2019.
             </p>
             <div className="pt-2 flex items-center gap-3 text-xs text-slate-400">
               <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
@@ -137,19 +137,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* Contact Details */}
           <div>
-            <h5 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Foundation HQ</h5>
+            <h5 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Foundation HQ & Registered Office</h5>
             <div className="space-y-3 text-xs text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <span>102, Trust Towers, Nariman Point, Mumbai, Maharashtra 400021</span>
+                <span className="leading-relaxed font-medium">
+                  Hindustan Tower, (Second Floor) Room No. 20, Jawahar Nagar, NH-37 Khanapara Road, Near Assam Kata, Basistha Charali, Guwahati - 781022 (Assam)
+                </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>+91 (022) 2890-4412</span>
+                <span>+91 1800-123-AVA / +91 98765 43210</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>contact@asthafoundation.org</span>
+                <span>contact@avafoundation.org</span>
               </div>
               <div className="pt-2">
                 <button 
@@ -167,7 +169,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Bottom Legal Copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} Astha Foundation. All rights reserved. Registered Trust Act 1882.</p>
+          <p>© {new Date().getFullYear()} AVA FOUNDATION. All rights reserved. Registered Trust Act 1882.</p>
           <div className="flex items-center gap-6">
             <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>

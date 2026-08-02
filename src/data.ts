@@ -120,7 +120,7 @@ export const INITIAL_USERS: UserRecord[] = [
     bloodGroup: 'B+',
     validUntil: '31/12/2027',
     qualification: 'M.B.A. Public Administration',
-    organization: 'Astha Foundation Regional Wing',
+    organization: 'AVA Foundation Regional Wing',
     department: 'Management',
     lastActive: 'Today, 08:30 AM'
   }

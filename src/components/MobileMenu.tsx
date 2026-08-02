@@ -106,18 +106,18 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-amber-400/40 shadow-xs shrink-0 flex items-center justify-center">
                 <img 
                   src={ASSETS.logoCircle} 
-                  alt="Astha Foundation Logo" 
+                  alt="AVA Foundation Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="font-extrabold text-sm text-white leading-tight truncate">Astha Foundation</h3>
+                  <h3 className="font-extrabold text-sm text-white leading-tight truncate">AVA FOUNDATION</h3>
                   <span className="bg-amber-400/15 text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase border border-amber-400/30 tracking-wider shrink-0">
                     Official
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">Empowering Youth & Communities</p>
+                <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5">Empowering youth</p>
               </div>
             </div>
 
@@ -263,7 +263,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
           <div className="pt-1 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1 font-medium">
             <PhoneCall className="w-3 h-3 text-amber-400" />
-            <span>Toll Free Support: 1800-123-ASTHA</span>
+            <span>Toll Free Support: 1800-123-AVA</span>
           </div>
         </div>
       </aside>

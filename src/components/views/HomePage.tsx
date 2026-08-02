@@ -1,7 +1,7 @@
 import React from 'react';
 import { ViewMode, ProjectItem } from '../../types';
 import { ASSETS } from '../../data';
-import { Heart, ArrowRight, ShieldCheck, Users, GraduationCap, Award, Sparkles, CheckCircle, Lightbulb } from 'lucide-react';
+import { Heart, ArrowRight, ShieldCheck, Users, GraduationCap, Award, Sparkles, CheckCircle, Lightbulb, FileText, Building2, CreditCard, ExternalLink, Check } from 'lucide-react';
 import { TestimonialSlider } from '../TestimonialSlider';
 import { FAQSection } from '../FAQSection';
 
@@ -35,7 +35,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed font-normal">
-                Building community, trust, and professional development opportunities for a brighter tomorrow. Astha Foundation connects mentors, teachers, and youth to break rural educational barriers.
+                Building community, trust, and professional development opportunities for a brighter tomorrow. AVA FOUNDATION connects mentors, teachers, and youth to break rural educational barriers.
               </p>
 
               <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -87,7 +87,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
                   <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-6 p-2 rounded-full bg-gradient-to-tr from-amber-100 to-blue-50 shadow-inner flex items-center justify-center border border-slate-200">
                     <img
                       src={ASSETS.logoCircle}
-                      alt="Astha Foundation Logo"
+                      alt="AVA Foundation Logo"
                       className="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -97,7 +97,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
                   </span>
 
                   <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                    Astha Foundation
+                    AVA FOUNDATION
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
                     Connecting grassroots leadership with youth education across Maharashtra and India.
@@ -251,6 +251,107 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, projects }) => {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* OFFICIAL LEGAL & REGISTRATION DOCUMENTS SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="bg-slate-900 rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden shadow-xl border border-slate-800">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 relative z-10 border-b border-slate-800 pb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-400/30 text-amber-300 font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <span>100% Verified Govt. Registration & Compliance</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Official Organization Documents</h2>
+              <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                AVA FOUNDATION operates with complete government authorization, transparent tax compliance, and verified banking infrastructure for public accountability.
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate('admin-legal')}
+              className="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs rounded-xl transition-colors shrink-0 flex items-center gap-2 cursor-pointer shadow-md"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Explore Legal Repository</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            {/* Card 1: PAN Card */}
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 hover:border-amber-400/50 transition-all flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center justify-center">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Verified PAN
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-sm text-white">Permanent Account Number (PAN)</h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">Income Tax Department, Govt. of India</p>
+                
+                <div className="mt-4 bg-slate-900/80 rounded-xl p-3 border border-slate-700 font-mono text-xs text-amber-300 font-bold flex justify-between items-center">
+                  <span>PAN: AAHTA5416F</span>
+                  <span className="text-[10px] font-sans text-slate-400 font-normal">Est. 27/08/2019</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal pt-2 border-t border-slate-700/50">
+                Official PAN registered under trust name <strong className="text-slate-200">AVA FOUNDATION</strong> for statutory compliance and donation receipts.
+              </p>
+            </div>
+
+            {/* Card 2: MSME Certificate */}
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 hover:border-amber-400/50 transition-all flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Check className="w-3 h-3" /> MSME Registered
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-sm text-white">Udyog Aadhaar MSME Certificate</h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">Ministry of MSME, Govt. of India</p>
+                
+                <div className="mt-4 bg-slate-900/80 rounded-xl p-3 border border-slate-700 font-mono text-xs text-amber-300 font-bold flex justify-between items-center">
+                  <span>UAM: AS03D0003712</span>
+                  <span className="text-[10px] font-sans text-slate-400 font-normal">Assam</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal pt-2 border-t border-slate-700/50">
+                Classified under Social Work Services (NIC 88100) at Patarkuchi, Guwahati, Kamrup Metro, Assam.
+              </p>
+            </div>
+
+            {/* Card 3: Banking Verification */}
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 hover:border-amber-400/50 transition-all flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Bank Account
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-sm text-white">ICICI Bank Current Account</h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">Hatigaon Branch, Guwahati - 781038</p>
+                
+                <div className="mt-4 bg-slate-900/80 rounded-xl p-3 border border-slate-700 font-mono text-[11px] text-emerald-300 font-bold space-y-0.5">
+                  <div className="flex justify-between"><span>A/C No:</span> <span>413605000147</span></div>
+                  <div className="flex justify-between text-slate-400 font-normal"><span>IFSC:</span> <span className="font-mono text-amber-300">ICIC0004136</span></div>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal pt-2 border-t border-slate-700/50">
+                Verified Business Banking Current Account & Cancelled Cheque on record for authentic operations.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
