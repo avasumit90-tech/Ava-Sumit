@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RoleType, RegistrationFormData, ApplicationStatus } from '../../types';
-import { User, GraduationCap, Briefcase, FileCheck, ArrowLeft, ArrowRight, Save, CheckCircle2, Upload, X, ShieldAlert, Sparkles, Check, Home, Camera, BadgeCheck, FileText } from 'lucide-react';
+import { User, GraduationCap, Briefcase, FileCheck, ArrowLeft, ArrowRight, Save, CheckCircle2, Upload, X, ShieldAlert, Sparkles, Check, Home, Camera, BadgeCheck, FileText, RotateCcw } from 'lucide-react';
 import { EducationAndSkillsForm } from '../EducationAndSkillsForm';
 import { ExperienceForm } from '../ExperienceForm';
 import { DocumentUploadForm } from '../DocumentUploadForm';
@@ -17,10 +17,14 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
   onBackToRoles,
   onSubmitApplication
 }) => {
+  const STORAGE_KEY = `astha_registration_draft_${selectedRole}`;
+
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [submittedAppId, setSubmittedAppId] = useState<string | null>(null);
   const [draftNotice, setDraftNotice] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [isRestored, setIsRestored] = useState(false);
 
   const roleTitles: Record<RoleType, string> = {
     didi: 'Astha Didi (Female Student Mentor)',
@@ -30,16 +34,32 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     coordinator: 'District / Block Coordinator'
   };
 
-  const [formData, setFormData] = useState<RegistrationFormData>({
+  const initialDefaultData: RegistrationFormData = {
     role: selectedRole,
     fullName: '',
+    applicationDate: new Date().toISOString().split('T')[0],
+    fatherHusbandName: '',
+    village: '',
+    postOffice: '',
+    gramPanchayat: '',
+    blockName: '',
+    districtName: '',
+    pinCode: '',
+    state: '',
+    aadharNumber: '',
+    panNumber: '',
+    bankName: '',
+    accountNumber: '',
+    ifscCode: '',
+    guardianPhone: '',
+    referenceName: '',
     dob: '',
     gender: 'Female',
     phone: '',
     email: '',
     address: '',
     passportPhoto: null,
-    qualification: 'Bachelor\'s Degree',
+    qualification: 'Higher Secondary',
     fieldOfStudy: 'Social Sciences',
     institution: '',
     completionYear: '2023',
@@ -58,7 +78,58 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
     addressProofType: 'Electricity Bill',
     addressDocName: null,
     termsAccepted: false
-  });
+  };
+
+  const [formData, setFormData] = useState<RegistrationFormData>(initialDefaultData);
+
+  // Restore draft on mount or role change
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.formData) {
+          setFormData(prev => ({
+            ...prev,
+            ...parsed.formData,
+            role: selectedRole
+          }));
+          if (parsed.currentStep) {
+            setCurrentStep(parsed.currentStep);
+          }
+          if (parsed.savedAt) {
+            setLastSavedAt(parsed.savedAt);
+          }
+          setIsRestored(true);
+        }
+      } else {
+        setIsRestored(false);
+        setLastSavedAt(null);
+      }
+    } catch (err) {
+      console.error('Error restoring registration draft:', err);
+    }
+  }, [selectedRole, STORAGE_KEY]);
+
+  // Auto-save to localStorage whenever formData or currentStep changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const draftPayload = {
+          formData,
+          currentStep,
+          savedAt: timeString
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(draftPayload));
+        setLastSavedAt(timeString);
+      } catch (err) {
+        console.error('Failed to auto-save draft:', err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData, currentStep, selectedRole, STORAGE_KEY]);
 
   const availableSkills = ['Mentorship', 'Counseling', 'Teaching', 'Healthcare', 'Community Outreach', 'Public Speaking', 'Event Planning', 'Digital Literacy'];
   const availableLanguages = ['Hindi', 'English', 'Marathi', 'Gujarati', 'Bengali', 'Tamil', 'Telugu'];
@@ -98,8 +169,32 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
   };
 
   const handleSaveDraft = () => {
-    setDraftNotice(true);
-    setTimeout(() => setDraftNotice(false), 3000);
+    try {
+      const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const draftPayload = {
+        formData,
+        currentStep,
+        savedAt: timeString
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draftPayload));
+      setLastSavedAt(timeString);
+      setDraftNotice(true);
+      setTimeout(() => setDraftNotice(false), 3000);
+    } catch (err) {
+      console.error('Failed to manually save draft:', err);
+    }
+  };
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      setFormData({ ...initialDefaultData, role: selectedRole });
+      setCurrentStep(1);
+      setLastSavedAt(null);
+      setIsRestored(false);
+    } catch (err) {
+      console.error('Failed to clear draft:', err);
+    }
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -122,6 +217,13 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
       totalSteps: 4,
       remarks: 'Application submitted successfully. Background verification pending.'
     };
+
+    // Remove saved draft from localStorage upon submission
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.error('Failed to clear draft on submit:', err);
+    }
 
     onSubmitApplication(newApp);
     setSubmittedAppId(newId);
@@ -253,13 +355,34 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
           </p>
         </div>
 
-        {/* Draft Notice */}
-        {draftNotice && (
-          <div className="bg-emerald-100 border border-emerald-300 text-emerald-900 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            Draft progress saved locally!
-          </div>
-        )}
+        {/* Draft Notice & Auto-save Status */}
+        <div className="flex flex-col sm:items-end gap-2">
+          {draftNotice && (
+            <div className="bg-emerald-100 border border-emerald-300 text-emerald-900 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              Draft progress saved locally!
+            </div>
+          )}
+          {isRestored && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-900 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Restored previous draft</span>
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                className="ml-1 text-[11px] font-bold text-rose-600 hover:text-rose-800 underline cursor-pointer"
+              >
+                Reset
+              </button>
+            </div>
+          )}
+          {lastSavedAt && (
+            <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Auto-saved locally ({lastSavedAt})
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Step Progress Visual */}
@@ -377,6 +500,194 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="teacherName">Teacher name *</label>
                     <input id="teacherName" type="text" required value={formData.teacherName || ''} onChange={(e) => handleInputChange('teacherName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                </>
+              ) : selectedRole === 'teacher' ? (
+                <>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">Applicant name *</label>
+                    <input id="fullName" type="text" required placeholder="Full Name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fatherHusbandName">Father/ husband name *</label>
+                    <input id="fatherHusbandName" type="text" required placeholder="Father or Husband Name" value={formData.fatherHusbandName || ''} onChange={(e) => handleInputChange('fatherHusbandName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="village">VILL- *</label>
+                    <input id="village" type="text" required placeholder="Village Name" value={formData.village || ''} onChange={(e) => handleInputChange('village', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="postOffice">Post office *</label>
+                    <input id="postOffice" type="text" required placeholder="Post Office" value={formData.postOffice || ''} onChange={(e) => handleInputChange('postOffice', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="blockName">Block *</label>
+                    <input id="blockName" type="text" required placeholder="Block Name" value={formData.blockName || ''} onChange={(e) => handleInputChange('blockName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="districtName">District *</label>
+                    <input id="districtName" type="text" required placeholder="District Name" value={formData.districtName || ''} onChange={(e) => handleInputChange('districtName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="phone">Phone *</label>
+                    <input id="phone" type="tel" required placeholder="Contact Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="email">Mail *</label>
+                    <input id="email" type="email" required placeholder="Email Address" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="qualification">Highest qualification *</label>
+                    <input id="qualification" type="text" required placeholder="e.g. M.A. / B.Ed / Graduation" value={formData.qualification} onChange={(e) => handleInputChange('qualification', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="dob">Dob *</label>
+                    <input id="dob" type="date" required value={formData.dob} onChange={(e) => handleInputChange('dob', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="referenceName">Reference *</label>
+                    <input id="referenceName" type="text" required placeholder="Reference Name / Contact" value={formData.referenceName || ''} onChange={(e) => handleInputChange('referenceName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+                </>
+              ) : selectedRole === 'didi' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="applicationDate">1. Application Date *</label>
+                    <input id="applicationDate" type="date" required value={formData.applicationDate || new Date().toISOString().split('T')[0]} onChange={(e) => handleInputChange('applicationDate', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fullName">2. Applicant Name *</label>
+                    <input id="fullName" type="text" required placeholder="Full Name of Applicant" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="fatherHusbandName">3. Father / Husband Name *</label>
+                    <input id="fatherHusbandName" type="text" required placeholder="Father or Husband Name" value={formData.fatherHusbandName || ''} onChange={(e) => handleInputChange('fatherHusbandName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="village">4. VILL- *</label>
+                    <input id="village" type="text" required placeholder="Village Name" value={formData.village || ''} onChange={(e) => handleInputChange('village', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="postOffice">5. Post Office *</label>
+                    <input id="postOffice" type="text" required placeholder="Post Office" value={formData.postOffice || ''} onChange={(e) => handleInputChange('postOffice', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="gramPanchayat">6. Gram Panchayat *</label>
+                    <input id="gramPanchayat" type="text" required placeholder="Gram Panchayat" value={formData.gramPanchayat || ''} onChange={(e) => handleInputChange('gramPanchayat', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="blockName">7. Block *</label>
+                    <input id="blockName" type="text" required placeholder="Block Name" value={formData.blockName || ''} onChange={(e) => handleInputChange('blockName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="districtName">8. District *</label>
+                    <input id="districtName" type="text" required placeholder="District Name" value={formData.districtName || ''} onChange={(e) => handleInputChange('districtName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="pinCode">9. Pin Code *</label>
+                    <input id="pinCode" type="text" required placeholder="PIN Code" value={formData.pinCode || ''} onChange={(e) => handleInputChange('pinCode', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="state">10. State *</label>
+                    <input id="state" type="text" required placeholder="State Name" value={formData.state || ''} onChange={(e) => handleInputChange('state', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="aadharNumber">11. Aadhar No *</label>
+                    <input id="aadharNumber" type="text" required placeholder="12-digit Aadhar Number" value={formData.aadharNumber || ''} onChange={(e) => handleInputChange('aadharNumber', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="panNumber">12. PAN No</label>
+                    <input id="panNumber" type="text" placeholder="10-character PAN No" value={formData.panNumber || ''} onChange={(e) => handleInputChange('panNumber', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div className="md:col-span-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <label className="block text-xs font-bold text-slate-800 mb-2">13. Bank Details *</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1" htmlFor="bankName">Bank Name</label>
+                        <input id="bankName" type="text" placeholder="e.g. SBI / PNB" value={formData.bankName || ''} onChange={(e) => handleInputChange('bankName', e.target.value)} className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1" htmlFor="accountNumber">Account Number</label>
+                        <input id="accountNumber" type="text" placeholder="Account Number" value={formData.accountNumber || ''} onChange={(e) => handleInputChange('accountNumber', e.target.value)} className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1" htmlFor="ifscCode">IFSC Code</label>
+                        <input id="ifscCode" type="text" placeholder="IFSC Code" value={formData.ifscCode || ''} onChange={(e) => handleInputChange('ifscCode', e.target.value)} className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="phone">14. Contact Number *</label>
+                    <input id="phone" type="tel" required placeholder="10-digit Mobile Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="guardianPhone">15. Guardian Contact Number *</label>
+                    <input id="guardianPhone" type="tel" required placeholder="Guardian Mobile Number" value={formData.guardianPhone || ''} onChange={(e) => handleInputChange('guardianPhone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="email">16. Mail ID *</label>
+                    <input id="email" type="email" required placeholder="email@example.com" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="dob">17. Date of Birth *</label>
+                    <input id="dob" type="date" required value={formData.dob} onChange={(e) => handleInputChange('dob', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="qualification">18. Qualification *</label>
+                    <input id="qualification" type="text" required placeholder="e.g. 12th Pass / Graduate" value={formData.qualification} onChange={(e) => handleInputChange('qualification', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="referenceName">19. Reference By *</label>
+                    <input id="referenceName" type="text" required placeholder="Referred By (Name/Contact)" value={formData.referenceName || ''} onChange={(e) => handleInputChange('referenceName', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">20. Passport Photo *</label>
+                    <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                      <div className="w-16 h-16 rounded-xl bg-slate-200 flex items-center justify-center overflow-hidden shrink-0 border border-slate-300">
+                        {formData.passportPhoto ? (
+                          <img src={formData.passportPhoto} alt="Passport Photo" className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="w-6 h-6 text-slate-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                handleInputChange('passportPhoto', reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-950 file:text-white hover:file:bg-blue-900 cursor-pointer"
+                        />
+                        <p className="text-[10px] text-slate-400 mt-1">Upload recent passport size photo (JPG, PNG)</p>
+                      </div>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -682,14 +993,28 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
         {/* Navigation Buttons */}
         <div className="pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
           
-          <button
-            type="button"
-            onClick={handleSaveDraft}
-            className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
-          >
-            <Save className="w-4 h-4 text-slate-500" />
-            <span>Save Draft</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+              title="Manually save current draft"
+            >
+              <Save className="w-4 h-4 text-slate-500" />
+              <span>Save Draft</span>
+            </button>
+            {(isRestored || lastSavedAt) && (
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                className="flex items-center gap-1.5 px-3 py-3 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-bold transition-colors cursor-pointer"
+                title="Clear saved draft and start fresh"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center gap-3">
             {currentStepIndex > 0 && (

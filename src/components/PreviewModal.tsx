@@ -89,6 +89,54 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({ isOpen, onClose, onS
                 <DetailRow label="Teacher Name" value={data.teacherName} />
               </div>
             </div>
+          ) : data.role === 'didi' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 pb-1 border-b border-slate-100">Personal & Address Info</h4>
+                <DetailRow label="Date" value={data.applicationDate} />
+                <DetailRow label="Applicant Name" value={data.fullName} />
+                <DetailRow label="Father / Husband Name" value={data.fatherHusbandName} />
+                <DetailRow label="VILL-" value={data.village} />
+                <DetailRow label="Post Office" value={data.postOffice} />
+                <DetailRow label="Gram Panchayat" value={data.gramPanchayat} />
+                <DetailRow label="Block" value={data.blockName} />
+                <DetailRow label="District" value={data.districtName} />
+                <DetailRow label="Pin Code" value={data.pinCode} />
+                <DetailRow label="State" value={data.state} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 pb-1 border-b border-slate-100">Identity, Bank & Contact Details</h4>
+                <DetailRow label="Aadhar No" value={data.aadharNumber} />
+                <DetailRow label="PAN No" value={data.panNumber} />
+                <DetailRow label="Bank Details" value={data.bankName || data.accountNumber ? `${data.bankName || ''} A/C: ${data.accountNumber || ''} ${data.ifscCode ? `(IFSC: ${data.ifscCode})` : ''}` : data.accountDetails} />
+                <DetailRow label="Contact Number" value={data.phone} />
+                <DetailRow label="Guardian Contact" value={data.guardianPhone} />
+                <DetailRow label="Mail ID" value={data.email} />
+                <DetailRow label="Date of Birth" value={data.dob} />
+                <DetailRow label="Qualification" value={data.qualification} />
+                <DetailRow label="Reference By" value={data.referenceName} />
+              </div>
+            </div>
+          ) : data.role === 'teacher' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 pb-1 border-b border-slate-100">Teacher Personal & Location Details</h4>
+                <DetailRow label="Applicant Name" value={data.fullName} />
+                <DetailRow label="Father / Husband Name" value={data.fatherHusbandName} />
+                <DetailRow label="VILL-" value={data.village} />
+                <DetailRow label="Post Office" value={data.postOffice} />
+                <DetailRow label="Block" value={data.blockName} />
+                <DetailRow label="District" value={data.districtName} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 pb-1 border-b border-slate-100">Contact & Qualification Details</h4>
+                <DetailRow label="Phone" value={data.phone} />
+                <DetailRow label="Mail" value={data.email} />
+                <DetailRow label="Highest Qualification" value={data.qualification} />
+                <DetailRow label="Date of Birth" value={data.dob} />
+                <DetailRow label="Reference" value={data.referenceName} />
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
               {/* Column 1: Personal Details */}

@@ -76,6 +76,14 @@ export interface ApplicationStatus {
 export interface RegistrationFormData {
   role: RoleType;
   fullName: string;
+  applicationDate?: string;
+  gramPanchayat?: string;
+  pinCode?: string;
+  panNumber?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  bankName?: string;
+  guardianPhone?: string;
   fatherHusbandName?: string;
   dob: string;
   gender: string;

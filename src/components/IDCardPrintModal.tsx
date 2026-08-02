@@ -75,7 +75,7 @@ export const IDCardPrintModal: React.FC<IDCardPrintModalProps> = ({ user, onClos
                 {/* ID Card Header */}
                 <div className="h-12 bg-blue-950 flex items-center px-4 gap-3 shrink-0">
                   <div className="w-8 h-8 rounded-full bg-white p-1 flex items-center justify-center shrink-0">
-                    <img src={ASSETS.LOGO} alt="Logo" className="w-full h-full object-contain" />
+                    <img src={ASSETS.logoCircle} alt="Logo" className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <h3 className="text-white font-black text-[13px] leading-tight tracking-wide">ASTHA FOUNDATION</h3>
