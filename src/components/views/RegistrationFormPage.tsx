@@ -141,6 +141,16 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
   const handleInputChange = (field: keyof RegistrationFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear per-field validation error + banner as soon as the user types,
+    // so red highlights don't linger after a fix.
+    const el = document.getElementById(field);
+    if (el) {
+      el.classList.remove('field-error');
+      const sibling = el.nextElementSibling;
+      if (sibling && sibling.classList.contains('inline-error')) sibling.remove();
+    }
+    setValidationError(null);
+    setAttempted(false);
   };
 
   const toggleArrayItem = (field: 'skills' | 'languages' | 'volunteeringInterests', item: string) => {
@@ -580,7 +590,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="motherPhoneNumber">Mother phone number *</label>
-                    <input id="motherPhoneNumber" type="tel" required value={formData.motherPhoneNumber || ''} onChange={(e) => handleInputChange('motherPhoneNumber', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                    <input id="motherPhoneNumber" type="tel" required data-rule="phone" maxLength={10} inputMode="numeric" value={formData.motherPhoneNumber || ''} onChange={(e) => handleInputChange('motherPhoneNumber', e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="guardianEmail">Gurdian mail id</label>
@@ -635,7 +645,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="phone">Phone *</label>
-                    <input id="phone" type="tel" required placeholder="Contact Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                    <input id="phone" type="tel" required data-rule="phone" maxLength={10} inputMode="numeric" placeholder="Contact Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="email">Mail *</label>
@@ -698,7 +708,7 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="pinCode">9. Pin Code *</label>
-                    <input id="pinCode" type="text" required placeholder="PIN Code" value={formData.pinCode || ''} onChange={(e) => handleInputChange('pinCode', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                    <input id="pinCode" type="text" required data-rule="pincode" placeholder="PIN Code" maxLength={6} value={formData.pinCode || ''} onChange={(e) => handleInputChange('pinCode', e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
                   </div>
 
                   <div>
@@ -736,12 +746,12 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="phone">14. Contact Number *</label>
-                    <input id="phone" type="tel" required placeholder="10-digit Mobile Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                    <input id="phone" type="tel" required data-rule="phone" maxLength={10} inputMode="numeric" placeholder="10-digit Mobile Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="guardianPhone">15. Guardian Contact Number *</label>
-                    <input id="guardianPhone" type="tel" required placeholder="Guardian Mobile Number" value={formData.guardianPhone || ''} onChange={(e) => handleInputChange('guardianPhone', e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
+                    <input id="guardianPhone" type="tel" required data-rule="phone" maxLength={10} inputMode="numeric" placeholder="Guardian Mobile Number" value={formData.guardianPhone || ''} onChange={(e) => handleInputChange('guardianPhone', e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white" />
                   </div>
 
                   <div>
@@ -877,9 +887,12 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                     id="phone"
                     type="tel"
                     required
+                    data-rule="phone"
+                    maxLength={10}
+                    inputMode="numeric"
                     placeholder="98765 43210"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                     className="flex-1 px-4 py-3 bg-slate-50 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white"
                   />
                 </div>
@@ -978,9 +991,12 @@ export const RegistrationFormPage: React.FC<RegistrationFormPageProps> = ({
                         id="emergencyContact"
                         type="tel"
                         required
+                        data-rule="phone"
+                        maxLength={10}
+                        inputMode="numeric"
                         placeholder="98765 43210"
                         value={formData.emergencyContact || ''}
-                        onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
+                        onChange={(e) => handleInputChange('emergencyContact', e.target.value.replace(/\D/g, '').slice(0, 10))}
                         className="flex-1 px-4 py-3 bg-slate-50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white"
                       />
                     </div>
