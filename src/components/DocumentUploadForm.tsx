@@ -188,6 +188,8 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
           <input
             type="checkbox"
             id="declaration"
+            required
+            data-required-msg="Please accept the declaration to continue"
             checked={!!data.declarationAccepted}
             onChange={(e) => onDeclarationChange(e.target.checked)}
             className="mt-1 rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer shrink-0"

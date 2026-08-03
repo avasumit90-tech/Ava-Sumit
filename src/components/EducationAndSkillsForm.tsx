@@ -70,6 +70,8 @@ export const EducationAndSkillsForm: React.FC<EducationAndSkillsFormProps> = ({
               <div className="relative">
                 <select
                   id="qualification"
+                  required
+                  data-required-msg="This field is required"
                   value={data.qualification || ''}
                   onChange={(e) => onChange('qualification', e.target.value)}
                   className="w-full appearance-none bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors cursor-pointer"
@@ -97,8 +99,13 @@ export const EducationAndSkillsForm: React.FC<EducationAndSkillsFormProps> = ({
               <input
                 id="year"
                 type="text"
+                required
+                data-rule="year"
+                data-required-msg="This field is required"
+                data-year-msg="Enter a valid completion year (e.g., 2022)"
+                pattern="[0-9]{4}"
                 value={data.completionYear || ''}
-                onChange={(e) => onChange('completionYear', e.target.value)}
+                onChange={(e) => onChange('completionYear', e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="e.g., 2022"
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
               />
@@ -116,6 +123,8 @@ export const EducationAndSkillsForm: React.FC<EducationAndSkillsFormProps> = ({
             <input
               id="institution"
               type="text"
+              required
+              data-required-msg="This field is required"
               value={data.institution || ''}
               onChange={(e) => onChange('institution', e.target.value)}
               placeholder="Enter school or university name"

@@ -74,6 +74,13 @@ export function fieldRuleError(el: HTMLInputElement): string | null {
     }
   }
 
+  if (rule === 'year') {
+    const digits = value.replace(/\D/g, '');
+    if (!/^\d{4}$/.test(digits)) {
+      return el.getAttribute('data-year-msg') || 'Enter a valid completion year (e.g., 2022)';
+    }
+  }
+
   // Any custom pattern attribute not satisfied.
   const pattern = el.getAttribute('pattern');
   if (pattern) {
@@ -107,6 +114,27 @@ export function validateRequiredFields(container: HTMLElement): {
   const fields = Array.from(
     container.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(selectors)
   );
+
+  // Validate required radio groups (none of the group is checked).
+  container.querySelectorAll<HTMLInputElement>('input[type="radio"][required]').forEach((radio) => {
+    const group = Array.from(
+      container.querySelectorAll<HTMLInputElement>(`input[type="radio"][name="${radio.name}"]`)
+    );
+    if (group.length && !group.some((r) => r.checked)) {
+      group.forEach((r) => r.classList.add('field-error'));
+      insertError(radio, requiredMessage(radio));
+      if (!firstInvalid) firstInvalid = radio;
+    }
+  });
+
+  // Validate required checkboxes (must be checked).
+  container.querySelectorAll<HTMLInputElement>('input[type="checkbox"][required]').forEach((cb) => {
+    if (!cb.checked) {
+      cb.classList.add('field-error');
+      insertError(cb, requiredMessage(cb));
+      if (!firstInvalid) firstInvalid = cb;
+    }
+  });
 
   fields.forEach((el) => {
     // 1) Required check

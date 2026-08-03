@@ -68,6 +68,8 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
               </label>
               <div className="relative">
                 <select
+                  required
+                  data-required-msg="This field is required"
                   value={data.experienceYears || ''}
                   onChange={(e) => onChange('experienceYears', e.target.value)}
                   className="w-full appearance-none bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors cursor-pointer"
@@ -91,6 +93,8 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
               </label>
               <input
                 type="text"
+                required
+                data-required-msg="This field is required"
                 value={data.designation || ''}
                 onChange={(e) => onChange('designation', e.target.value)}
                 placeholder="e.g. Program Coordinator / Teacher"
@@ -105,6 +109,8 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
               </label>
               <input
                 type="text"
+                required
+                data-required-msg="This field is required"
                 value={data.organization || ''}
                 onChange={(e) => onChange('organization', e.target.value)}
                 placeholder="Name of your company, NGO, or educational institution"
@@ -119,6 +125,8 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
               </label>
               <textarea
                 rows={3}
+                required
+                data-required-msg="This field is required"
                 value={data.responsibilities || ''}
                 onChange={(e) => onChange('responsibilities', e.target.value)}
                 placeholder="Briefly describe your main professional or social leadership tasks..."
@@ -138,6 +146,7 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   type="radio"
                   name="volunteered"
                   value="yes"
+                  required
                   checked={hasVolunteered === 'yes'}
                   onChange={() => {
                     setHasVolunteered('yes');
@@ -171,6 +180,8 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 </label>
                 <textarea
                   rows={3}
+                  required
+                  data-required-msg="This field is required"
                   value={data.previousVolunteerDetails || ''}
                   onChange={(e) => onChange('previousVolunteerDetails', e.target.value)}
                   placeholder="Where did you volunteer and what impact did you create?"
